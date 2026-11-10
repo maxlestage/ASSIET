@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    name: CLI, TUI et frigo-core
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy --all-targets --locked -- -D warnings
+      - run: cargo test --locked
+      - run: cargo build --release --locked
+
+  site:
+    name: Site (Paquets + WebAssembly)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: site
+      - run: cargo install wasm-bindgen-cli --version 0.2.130 --locked
+      - run: cargo test --locked
+      - run: cargo build --lib --target wasm32-unknown-unknown --profile wasm-release --locked
+      - run: >
+          wasm-bindgen --target web --no-typescript --remove-name-section --remove-producers-section
+          --out-dir pkg target/wasm32-unknown-unknown/wasm-release/frigo_site.wasm
+      - run: cargo build --release --locked
+
+  ios:
+    name: FrigoKit et app iOS (Swift)
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: ios
+    steps:
+      - uses: actions/checkout@v7
+      - uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+      - run: swift test
+      - run: brew install xcodegen && xcodegen
+      - run: >
+          xcodebuild build -project FrigoVide.xcodeproj -scheme FrigoVide
+          -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO

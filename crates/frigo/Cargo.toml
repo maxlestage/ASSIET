@@ -1,0 +1,23 @@
+[package]
+name = "frigo"
+description = "Frigo vide : la recette la plus rapide avec ce qu'il reste dans le frigo (CLI et TUI, TheMealDB)."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords = ["recipes", "cli", "tui", "themealdb", "cooking"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "frigo"
+path = "src/main.rs"
+
+[dependencies]
+frigo-core = { workspace = true }
+tokio = { workspace = true }
+clap = { workspace = true }
+ratatui = { workspace = true }
+color-eyre = { workspace = true }
+serde_json = { workspace = true }

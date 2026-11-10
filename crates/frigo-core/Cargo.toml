@@ -1,0 +1,24 @@
+[package]
+name = "frigo-core"
+description = "Le cœur de « Frigo vide » : client TheMealDB, normalisation des ingrédients, filtrage et classement des recettes."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[features]
+default = ["http"]
+## Le client HTTP asynchrone (reqwest + tokio). Sans lui, il reste la logique pure
+## (normalisation, filtrage, estimation du temps), utilisable partout, même en WebAssembly.
+http = ["dep:reqwest", "dep:futures"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
