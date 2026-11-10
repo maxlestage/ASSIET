@@ -1,0 +1,9 @@
+target/
+/site/target/
+/site/pkg/
+.DS_Store
+*.xcodeproj/xcuserdata/
+.build/
+.swiftpm/
+DerivedData/
+/ios/FrigoVide.xcodeproj/

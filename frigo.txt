@@ -1,0 +1,5 @@
+# Mon frigo (un ingrédient par ligne, ou séparés par des virgules)
+poulet
+riz
+oignon, ail
+tomates

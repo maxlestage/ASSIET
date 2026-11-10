@@ -1,0 +1,66 @@
+[package]
+name = "frigo-site"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.95"
+publish = false
+license = "MIT"
+description = "Le site de présentation de Frigo vide, écrit en Rust avec Paquets : pages rendues par le serveur, îlots WebAssembly et 3D WebGL 2."
+
+# Crate autonome (le workspace racine l'exclut) : une bibliothèque partagée par le serveur et
+# le navigateur (îlots, scène 3D) et, compilée en WebAssembly, le bundle du navigateur.
+[workspace]
+
+[lib]
+name = "frigo_site"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "frigo-site"
+path = "src/main.rs"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+paquets = { git = "https://github.com/maxlestage/Paquets" }
+frigo-core = { path = "../crates/frigo-core" }
+tokio = { version = "1.54", features = ["macros", "rt-multi-thread", "sync"] }
+reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+paquets = { git = "https://github.com/maxlestage/Paquets", default-features = false, features = ["client"] }
+wasm-bindgen = "=0.2.130"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = [
+  "AddEventListenerOptions",
+  "CssStyleDeclaration",
+  "Document",
+  "DomTokenList",
+  "Element",
+  "EventTarget",
+  "HtmlElement",
+  "IntersectionObserver",
+  "IntersectionObserverEntry",
+  "IntersectionObserverInit",
+  "MediaQueryList",
+  "NodeList",
+  "PointerEvent",
+  "Response",
+  "Window",
+  "console",
+] }
+
+[dev-dependencies]
+tokio = { version = "1.54", features = ["macros", "rt-multi-thread"] }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+# Le bundle du navigateur : `cargo build --lib --target wasm32-unknown-unknown --profile wasm-release`.
+[profile.wasm-release]
+inherits = "release"
+opt-level = "s"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = false
