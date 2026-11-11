@@ -54,8 +54,8 @@ pub fn app() -> App {
             .short_name("Frigo vide")
             .description("La recette la plus rapide avec ce qu'il reste dans le frigo.")
             .start_url("/")
-            .theme_color("#0b0a12")
-            .background_color("#0b0a12")
+            .theme_color("#fff8ec")
+            .background_color("#fff8ec")
             .categories(["food", "lifestyle", "utilities"]),
     );
     let v = css_version;

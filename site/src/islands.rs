@@ -1,4 +1,4 @@
-//! Les îlots : la scène 3D du haut de la page et la démo du frigo.
+//! Les îlots : le frigo dessiné du haut de la page, et la démo.
 
 use paquets::prelude::*;
 
@@ -30,47 +30,115 @@ pub struct Answer {
     pub error: Option<String>,
 }
 
-/// L'assiette 3D : des ingrédients tombent, rebondissent et s'empilent (la physique
-/// d'Active). Le serveur rend un canvas vide ; le navigateur lance la scène.
-pub fn assiette(_props: &str) -> Node {
-    let count = use_state(0usize);
-    fragment([
-        canvas()
-            .class("assiette")
-            .attr("role", "img")
-            .attr(
-                "aria-label",
-                "Des ingrédients en 3D tombent dans une assiette",
-            )
-            .use_action(move |canvas| play(canvas, count)),
-        p().class("assiette__hud")
-            .attr("aria-hidden", "true")
-            .child(
-                span()
-                    .class("chip chip--live")
-                    .text("WebGL 2 · active::ecs"),
-            )
-            .child(
-                span()
-                    .class("assiette__count")
-                    .text_dyn(move || match count.get() {
-                        0 => "Touchez l'assiette".into(),
-                        1 => "1 ingrédient".into(),
-                        n => format!("{n} ingrédients"),
-                    }),
-            ),
-    ])
-}
+/// Ce que le frigo dessiné peut contenir : un emoji, un nom, une couleur de fond.
+const SHELF: [(&str, &str, &str); 12] = [
+    ("🍅", "tomate", "tomato"),
+    ("🥕", "carotte", "orange"),
+    ("🧀", "fromage", "sun"),
+    ("🥚", "œufs", "cream"),
+    ("🍗", "poulet", "peach"),
+    ("🥦", "brocoli", "mint"),
+    ("🍋", "citron", "sun"),
+    ("🧅", "oignon", "grape"),
+    ("🍄", "champignon", "peach"),
+    ("🥛", "lait", "sky"),
+    ("🫑", "poivron", "mint"),
+    ("🍚", "riz", "cream"),
+];
 
-#[cfg(target_arch = "wasm32")]
-fn play(canvas: &paquets::active::Dom, count: State<usize>) -> impl FnOnce() + use<> {
-    let running = crate::scene::start(canvas, count);
-    move || drop(running)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn play(_canvas: &paquets::active::Dom, _count: State<usize>) -> impl FnOnce() + use<> {
-    || {}
+/// Le frigo du haut de la page : un dessin plat et coloré. Toucher la porte l'ouvre
+/// (les ingrédients sautent sur les étagères), la toucher encore change le contenu.
+pub fn frigo_dessin(_props: &str) -> Node {
+    let open = use_state(false);
+    let round = use_state(0usize);
+    let shelves = move || {
+        let r = round.get();
+        (0..3)
+            .map(|row| {
+                div()
+                    .class("fridge__shelf")
+                    .children((0..3).map(move |col| {
+                        let (emoji, name, tone) = SHELF[(r * 5 + row * 3 + col) % SHELF.len()];
+                        span()
+                            .class(format!("food food--{tone}"))
+                            .style(format!("--i:{}", row * 3 + col))
+                            .attr("title", name)
+                            .text(emoji)
+                    }))
+                    .into()
+            })
+            .collect::<Vec<Node>>()
+    };
+    div()
+        .class("fridge")
+        .class_if("is-open", move || open.get())
+        .child(
+            div()
+                .class("fridge__body")
+                .child(
+                    div()
+                        .class("fridge__freezer")
+                        .child(span().class("fridge__ice").text("❄️")),
+                )
+                .child(
+                    div()
+                        .class("fridge__inside")
+                        .attr("aria-live", "polite")
+                        .children_dyn(move || {
+                            // Une nouvelle liste à chaque tour : les ingrédients sautent.
+                            let _ = round.get();
+                            shelves()
+                        }),
+                )
+                .child(
+                    button()
+                        .class("fridge__door")
+                        .attr("type", "button")
+                        .attr_dyn("aria-label", move || {
+                            if open.get() {
+                                "Changer le contenu du frigo".into()
+                            } else {
+                                "Ouvrir le frigo".into()
+                            }
+                        })
+                        .attr_dyn("aria-pressed", move || open.get().to_string())
+                        .on_click(move |_| {
+                            if open.get() {
+                                round.update(|r| *r += 1);
+                            } else {
+                                open.set(true);
+                            }
+                        })
+                        .child(span().class("fridge__handle"))
+                        .child(span().class("fridge__magnet fridge__magnet--a").text("🍕"))
+                        .child(span().class("fridge__magnet fridge__magnet--b").text("⭐"))
+                        .child(span().class("fridge__note").text("Ouvre-moi !")),
+                )
+                .child(div().class("fridge__feet").child(span()).child(span())),
+        )
+        .child(
+            div()
+                .class("fridge__caption")
+                .child(span().class("fridge__count").text_dyn(move || {
+                    if open.get() {
+                        format!(
+                            "Tour n°\u{a0}{} · touchez encore pour remplir",
+                            round.get() + 1
+                        )
+                    } else {
+                        "Touchez la porte".into()
+                    }
+                }))
+                .child(
+                    button()
+                        .class("link")
+                        .attr("type", "button")
+                        .bool_attr("hidden", move || !open.get())
+                        .on_click(move |_| open.set(false))
+                        .text("Fermer"),
+                ),
+        )
+        .into()
 }
 
 /// Les ingrédients proposés d'un toucher.
@@ -89,7 +157,7 @@ pub const SUGGESTIONS: [&str; 12] = [
     "citron",
 ];
 
-/// La démo : le frigo (des étiquettes), « Ouvrir le frigo », et les recettes.
+/// La démo : le frigo (des étiquettes), « Trouver une recette », et les recettes.
 /// Les props sont la liste de départ, séparée par des virgules.
 pub fn frigo(props: &str) -> Node {
     let start: Vec<String> = props
@@ -134,15 +202,15 @@ pub fn frigo(props: &str) -> Node {
     };
 
     div()
-        .class("frigo")
-        .class_if("frigo--open", move || answer.with(|a| a.is_some()))
-        .class_if("frigo--loading", move || loading.get())
+        .class("demo")
+        .class_if("demo--loading", move || loading.get())
         .child(
             div()
-                .class("frigo__door")
+                .class("panel panel--sun demo__fridge")
+                .child(h3().class("panel__title").text("🧊 Mon frigo"))
                 .child(
                     div()
-                        .class("frigo__shelf")
+                        .class("demo__items")
                         .attr("aria-live", "polite")
                         .children_dyn(move || {
                             let list = items.get();
@@ -154,7 +222,7 @@ pub fn frigo(props: &str) -> Node {
                                 .map(|(i, item)| {
                                     let label = item.clone();
                                     button()
-                                        .class("chip chip--item")
+                                        .class(format!("tag tag--{}", ["tomato", "mint", "sky", "grape", "peach"][i % 5]))
                                         .attr("type", "button")
                                         .attr("aria-label", format!("Retirer {label}"))
                                         .style(format!("--i:{i}"))
@@ -163,7 +231,7 @@ pub fn frigo(props: &str) -> Node {
                                             items.update(|l| l.retain(|x| *x != gone));
                                         })
                                         .text(label)
-                                        .child(span().attr("aria-hidden", "true").text(" ×"))
+                                        .child(span().attr("aria-hidden", "true").text("\u{a0}✕"))
                                         .into()
                                 })
                                 .collect()
@@ -171,7 +239,7 @@ pub fn frigo(props: &str) -> Node {
                 )
                 .child(
                     div()
-                        .class("frigo__add")
+                        .class("demo__add")
                         .child(
                             input()
                                 .attr("type", "text")
@@ -192,7 +260,7 @@ pub fn frigo(props: &str) -> Node {
                         )
                         .child(
                             button()
-                                .class("button button--ghost")
+                                .class("btn btn--ink")
                                 .attr("type", "button")
                                 .on_click(move |_| {
                                     add(draft.get());
@@ -201,20 +269,18 @@ pub fn frigo(props: &str) -> Node {
                                 .text("Ajouter"),
                         ),
                 )
-                .child(
-                    div().class("frigo__suggest").children(SUGGESTIONS.iter().map(|s| {
-                        let s = *s;
-                        button()
-                            .class("chip chip--suggest")
-                            .attr("type", "button")
-                            .class_if("is-in", move || items.with(|l| l.iter().any(|x| x == s)))
-                            .on_click(move |_| add(s.to_owned()))
-                            .text(format!("+ {s}"))
-                    })),
-                )
+                .child(div().class("demo__suggest").children(SUGGESTIONS.iter().map(|s| {
+                    let s = *s;
+                    button()
+                        .class("tag tag--ghost")
+                        .attr("type", "button")
+                        .class_if("is-in", move || items.with(|l| l.iter().any(|x| x == s)))
+                        .on_click(move |_| add(s.to_owned()))
+                        .text(format!("+ {s}"))
+                })))
                 .child(
                     div()
-                        .class("frigo__actions")
+                        .class("demo__actions")
                         .child(
                             label()
                                 .class("switch")
@@ -225,58 +291,59 @@ pub fn frigo(props: &str) -> Node {
                                         .on("change", move |_| strict.update(|s| *s = !*s)),
                                 )
                                 .child(span().class("switch__track").attr("aria-hidden", "true"))
-                                .child(span().text("Sans courses (strict)")),
+                                .child(span().text("Sans courses")),
                         )
                         .child(
                             button()
-                                .class("button button--primary")
+                                .class("btn btn--tomato btn--big")
                                 .attr("type", "button")
                                 .bool_attr("disabled", move || loading.get())
                                 .on_click(move |_| search())
-                                .child(span().class("button__icon").attr("aria-hidden", "true").text("🧊"))
+                                .child(span().class("btn__icon").attr("aria-hidden", "true").text("🍳"))
                                 .text_dyn(move || {
-                                    if loading.get() { "Je fouille…".into() } else { "Ouvrir le frigo".into() }
+                                    if loading.get() { "Je cherche…".into() } else { "Trouver une recette".into() }
                                 }),
                         ),
                 ),
         )
         .child(
             div()
-                .class("frigo__results")
+                .class("demo__results")
                 .attr("aria-live", "polite")
                 .children_dyn(move || match answer.get() {
                     None => vec![
                         div()
                             .class("empty")
-                            .child(div().class("empty__plate").attr("aria-hidden", "true"))
-                            .child(p().class("muted").text("Les recettes apparaîtront ici, de la plus rapide à la plus longue."))
+                            .child(div().class("empty__plate").attr("aria-hidden", "true").child(span().text("🍽️")))
+                            .child(p().text("Les recettes arrivent ici, de la meilleure à la moins bonne."))
                             .into(),
                     ],
-                    Some(Answer { error: Some(e), .. }) => {
-                        vec![p().class("alert").text(e).into()]
-                    }
+                    Some(Answer { error: Some(e), .. }) => vec![p().class("alert").text(e).into()],
                     Some(Answer { cards, .. }) if cards.is_empty() => vec![
                         p().class("alert")
-                            .text("Aucune recette avec ce frigo. Essayez sans le mode strict, ou ajoutez un ingrédient.")
+                            .text("Aucune recette avec ce frigo. Essayez sans « Sans courses », ou ajoutez un ingrédient.")
                             .into(),
                     ],
-                    Some(Answer { cards, .. }) => cards
-                        .into_iter()
-                        .enumerate()
-                        .map(|(i, c)| card(i, c))
-                        .collect(),
+                    Some(Answer { cards, .. }) => cards.into_iter().enumerate().map(|(i, c)| card(i, c)).collect(),
                 }),
         )
         .into()
 }
 
-/// Une recette : une carte qui se retourne (la photo devant, les étapes derrière).
+/// Les couleurs des cartes, à tour de rôle.
+const TONES: [&str; 5] = ["sun", "mint", "sky", "peach", "grape"];
+
+/// Une recette : la photo, le temps, ce qui manque ; « Voir la recette » déplie le détail.
 fn card(index: usize, c: Card) -> Node {
-    let flipped = use_state(false);
-    let best = index == 0;
-    let mut front = div().class("card__face card__front");
+    let open = use_state(false);
+    let tone = TONES[index % TONES.len()];
+    let meta: Vec<String> = [c.category.clone(), c.area.clone()]
+        .into_iter()
+        .flatten()
+        .collect();
+    let mut media = div().class("card__media");
     if let Some(src) = &c.thumb {
-        front = front.child(
+        media = media.child(
             img()
                 .attr("src", src.clone())
                 .attr("alt", "")
@@ -286,51 +353,11 @@ fn card(index: usize, c: Card) -> Node {
                 .attr("height", "350"),
         );
     }
-    let meta: Vec<String> = [c.category.clone(), c.area.clone()]
-        .into_iter()
-        .flatten()
-        .collect();
-    front = front
-        .child(
-            div()
-                .class("card__body")
-                .child(
-                    div()
-                        .class("card__tags")
-                        .child(
-                            span()
-                                .class("chip chip--time")
-                                .text(format!("≈ {} min", c.minutes)),
-                        )
-                        .child(if c.missing.is_empty() {
-                            span().class("chip chip--ok").text("Rien à acheter")
-                        } else {
-                            span()
-                                .class("chip chip--miss")
-                                .text(format!("Manque {}", c.missing.len()))
-                        }),
-                )
-                .child(h3().text(c.name.clone()))
-                .child(p().class("muted").text(meta.join(" · ")))
-                .child(
-                    div()
-                        .class("meter")
-                        .attr("role", "img")
-                        .attr(
-                            "aria-label",
-                            format!("{}\u{a0}% des ingrédients", c.coverage),
-                        )
-                        .child(span().style(format!("--p:{}%", c.coverage))),
-                ),
-        )
-        .child(
-            span()
-                .class("card__hint")
-                .attr("aria-hidden", "true")
-                .text("Touchez pour retourner ↻"),
-        );
-    let mut back = div()
-        .class("card__face card__back")
+    if index == 0 {
+        media = media.child(span().class("card__badge").text("⭐ Meilleur choix"));
+    }
+    let mut details = div()
+        .class("card__details")
         .child(h4().text("Il vous faut"))
         .child(
             ul().class("checks").children(
@@ -346,33 +373,66 @@ fn card(index: usize, c: Card) -> Node {
                 .children(c.steps.iter().take(3).map(|s| li().text(s.clone()))),
         );
     if let Some(video) = c.youtube.clone() {
-        back = back.child(
-            a().class("button button--ghost")
+        details = details.child(
+            a().class("btn btn--ink btn--small")
                 .href(video)
                 .attr("target", "_blank")
                 .attr("rel", "noopener")
-                .text("▶ Voir la vidéo"),
+                .text("▶ La vidéo"),
         );
     }
     article()
-        .class("card")
-        .class_if("card--best", move || best)
-        .class_if("is-flipped", move || flipped.get())
+        .class(format!("card card--{tone}"))
+        .class_if("is-open", move || open.get())
         .style(format!("--i:{index}"))
+        .child(media)
         .child(
-            button()
-                .class("card__flip")
-                .attr("type", "button")
-                .attr_dyn("aria-pressed", move || flipped.get().to_string())
-                .attr("aria-label", format!("Retourner la carte {}", c.name))
-                .on_click(move |_| flipped.update(|f| *f = !*f)),
+            div()
+                .class("card__body")
+                .child(
+                    div()
+                        .class("card__tags")
+                        .child(
+                            span()
+                                .class("pill pill--white")
+                                .text(format!("⏱ ≈ {} min", c.minutes)),
+                        )
+                        .child(if c.missing.is_empty() {
+                            span().class("pill pill--mint").text("✓ Rien à acheter")
+                        } else {
+                            span()
+                                .class("pill pill--tomato")
+                                .text(format!("🛒 Manque {}", c.missing.len()))
+                        }),
+                )
+                .child(h3().text(c.name.clone()))
+                .child(p().class("card__meta").text(meta.join(" · ")))
+                .child(
+                    div()
+                        .class("meter")
+                        .attr("role", "img")
+                        .attr(
+                            "aria-label",
+                            format!("{}\u{a0}% des ingrédients", c.coverage),
+                        )
+                        .child(span().style(format!("--p:{}%", c.coverage))),
+                )
+                .child(
+                    button()
+                        .class("card__toggle")
+                        .attr("type", "button")
+                        .attr_dyn("aria-expanded", move || open.get().to_string())
+                        .on_click(move |_| open.update(|o| *o = !*o))
+                        .text_dyn(move || {
+                            if open.get() {
+                                "Masquer ▲".into()
+                            } else {
+                                "Voir la recette ▼".into()
+                            }
+                        }),
+                )
+                .child(div().class("card__fold").child(details)),
         )
-        .child(if best {
-            span().class("card__ribbon").text("Meilleur choix")
-        } else {
-            span().class("card__ribbon card__ribbon--none")
-        })
-        .child(div().class("card__inner").child(front).child(back))
         .into()
 }
 
