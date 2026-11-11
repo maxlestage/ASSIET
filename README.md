@@ -10,7 +10,7 @@ moins de choses, qui utilise le plus votre frigo, et la plus rapide à préparer
 | Le cœur | `crates/frigo-core` | Rust 2024, tokio, reqwest 0.13, serde |
 | La CLI et la TUI | `crates/frigo` | clap 4.6, ratatui 0.30, crossterm 0.29, color-eyre |
 | Le site de présentation | `site/` | [Paquets](https://github.com/maxlestage/Paquets), îlots WebAssembly, design 2D plat et coloré |
-| L'app iPhone | `ios/` | Swift 6.4, SwiftUI (iOS 26), SwiftData, Swift Testing, XcodeGen |
+| L'app iPhone | `ios/` | Swift 6.3 (Xcode 26), SwiftUI (iOS 26), SwiftData, Swift Testing, XcodeGen |
 
 ## La CLI
 
