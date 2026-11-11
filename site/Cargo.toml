@@ -27,6 +27,10 @@ reqwest = { version = "0.13", default-features = false, features = ["rustls"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 paquets = { git = "https://github.com/maxlestage/Paquets", default-features = false, features = ["client"] }
+# Sur GitHub Pages, le navigateur interroge TheMealDB lui-même et classe avec le même cœur
+# (sans son client HTTP natif).
+frigo-core = { path = "../crates/frigo-core", default-features = false }
+futures = "0.3.34"
 wasm-bindgen = "=0.2.130"
 wasm-bindgen-futures = "0.4"
 js-sys = "0.3"

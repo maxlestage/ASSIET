@@ -138,20 +138,114 @@ fn scroll_state(root: &HtmlElement) {
 
 /// `GET /api/recettes?i=…&strict=…`, puis `done(réponse)`.
 pub fn fetch_answer(items: Vec<String>, strict: bool, done: impl FnOnce(Answer) + 'static) {
-    let query: String = items
-        .iter()
-        .map(|i| String::from(js_sys::encode_uri_component(i)))
-        .collect::<Vec<_>>()
-        .join(",");
-    let url = format!("/api/recettes?i={query}&strict={}", u8::from(strict));
     wasm_bindgen_futures::spawn_local(async move {
-        let answer = load(&url).await.unwrap_or_else(|e| Answer {
+        let result = if is_static() {
+            search_mealdb(&items, strict).await
+        } else {
+            let query: String = items
+                .iter()
+                .map(|i| String::from(js_sys::encode_uri_component(i)))
+                .collect::<Vec<_>>()
+                .join(",");
+            load(&format!(
+                "/api/recettes?i={query}&strict={}",
+                u8::from(strict)
+            ))
+            .await
+        };
+        let answer = result.unwrap_or_else(|e| Answer {
             fridge: items,
             cards: Vec::new(),
             error: Some(e),
         });
         done(answer);
     });
+}
+
+/// La page vient du site statique (GitHub Pages) : pas de serveur, pas d'`/api`.
+fn is_static() -> bool {
+    document()
+        .query_selector("[data-mode='static']")
+        .ok()
+        .flatten()
+        .is_some()
+}
+
+const MEALDB: &str = "https://www.themealdb.com/api/json/v1/1";
+
+/// Le texte d'une adresse.
+async fn get_text(url: &str) -> Result<String, String> {
+    let offline = || "Pas de réseau\u{a0}: la démo a besoin de TheMealDB.".to_string();
+    let response: web_sys::Response = JsFuture::from(window().fetch_with_str(url))
+        .await
+        .map_err(|_| offline())?
+        .unchecked_into();
+    if !response.ok() {
+        return Err(format!("TheMealDB a répondu {}.", response.status()));
+    }
+    JsFuture::from(response.text().map_err(|_| offline())?)
+        .await
+        .map_err(|_| offline())
+        .map(|t| t.as_string().unwrap_or_default())
+}
+
+/// La recherche de `frigo-core` (comme `MealDb::suggest`), faite par le navigateur :
+/// TheMealDB autorise les appels de toutes les origines.
+async fn search_mealdb(fridge: &[String], strict: bool) -> Result<Answer, String> {
+    use std::collections::HashMap;
+
+    let unreadable = |_| "Réponse illisible de TheMealDB.".to_string();
+    // 1. Chaque ingrédient, en parallèle.
+    let lists = futures::future::join_all(fridge.iter().map(|item| {
+        let url = format!(
+            "{MEALDB}/filter.php?i={}",
+            String::from(js_sys::encode_uri_component(&frigo_core::api_name(item)))
+        );
+        async move { get_text(&url).await }
+    }))
+    .await;
+    let mut hits: HashMap<String, (usize, usize)> = HashMap::new();
+    let mut order = 0;
+    for list in lists {
+        for summary in frigo_core::parse_summaries(&list?).map_err(unreadable)? {
+            order += 1;
+            hits.entry(summary.id).or_insert((0, order)).0 += 1;
+        }
+    }
+    let mut ids: Vec<(String, (usize, usize))> = hits.into_iter().collect();
+    ids.sort_by(|(_, (a, oa)), (_, (b, ob))| b.cmp(a).then(oa.cmp(ob)));
+    ids.truncate(24);
+
+    // 2. Le détail des meilleures, en parallèle.
+    let details = futures::future::join_all(
+        ids.iter()
+            .map(|(id, _)| format!("{MEALDB}/lookup.php?i={id}"))
+            .map(|url| async move { get_text(&url).await }),
+    )
+    .await;
+    let mut meals = Vec::new();
+    for detail in details {
+        meals.extend(frigo_core::parse_meals(&detail?).map_err(unreadable)?);
+    }
+
+    // 3. Le classement, avec le même cœur que la CLI.
+    let criteria = frigo_core::Criteria {
+        strict,
+        ..frigo_core::Criteria::default()
+    };
+    let cards = frigo_core::rank(&meals, fridge, &criteria)
+        .iter()
+        .take(crate::recipes::CARDS)
+        .map(|m| {
+            let thumb = m.meal.thumbnail.as_ref().map(|t| format!("{t}/small"));
+            crate::recipes::card(m, thumb)
+        })
+        .collect();
+    Ok(Answer {
+        fridge: fridge.to_vec(),
+        cards,
+        error: None,
+    })
 }
 
 async fn load(url: &str) -> Result<Answer, String> {

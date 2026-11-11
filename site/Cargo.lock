@@ -603,6 +603,7 @@ name = "frigo-site"
 version = "0.1.0"
 dependencies = [
  "frigo-core",
+ "futures",
  "js-sys",
  "paquets",
  "reqwest",
