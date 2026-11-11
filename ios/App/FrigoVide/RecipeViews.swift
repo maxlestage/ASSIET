@@ -44,7 +44,7 @@ struct RecipeCard: View {
                     Text("Frigo")
                 }
                 .gaugeStyle(.accessoryLinearCapacity)
-                .tint(.linearGradient(colors: [.orange, .yellow, .mint], startPoint: .leading, endPoint: .trailing))
+                .tint(.mint)
             }
             .padding(16)
         }
