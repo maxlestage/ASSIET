@@ -1,4 +1,4 @@
-// swift-tools-version: 6.4
+// swift-tools-version: 6.3
 // FrigoKit : le cœur de Frigo vide en Swift (modèles TheMealDB, normalisation des
 // ingrédients, classement, client asynchrone). Sans dépendance, testé avec Swift Testing,
 // compilable sur iOS, macOS et Linux. L'app SwiftUI (App/) l'utilise via project.yml.
