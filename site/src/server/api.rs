@@ -9,9 +9,8 @@ use frigo_core::{Criteria, Match, MealDb, parse_list};
 use paquets::prelude::*;
 
 use crate::islands::{Answer, Card};
+use crate::recipes::CARDS;
 
-/// Le nombre de recettes envoyées à la démo.
-const CARDS: usize = 6;
 /// Le nombre d'ingrédients au plus (l'API est interrogée une fois par ingrédient).
 const MAX_ITEMS: usize = 12;
 /// Combien de temps une réponse est gardée.
@@ -43,33 +42,15 @@ pub fn mount(app: &mut App) {
     });
 }
 
-/// Une recette de `frigo-core`, pour la carte de la démo.
+/// Une recette de `frigo-core`, pour la carte de la démo (photo relayée par le site).
 pub fn card(m: &Match) -> Card {
-    Card {
-        id: m.meal.id.clone(),
-        name: m.meal.name.clone(),
-        thumb: m
-            .meal
-            .thumbnail
-            .as_deref()
-            .and_then(thumb_file)
-            .map(|f| format!("/vignette/{f}")),
-        minutes: m.minutes,
-        category: m.meal.category.clone(),
-        area: m.meal.area.clone(),
-        have: m.have.clone(),
-        missing: m.missing.clone(),
-        coverage: (m.coverage() * 100.0).round() as u32,
-        steps: m
-            .meal
-            .instructions
-            .lines()
-            .map(str::trim)
-            .filter(|l| l.len() > 12)
-            .map(str::to_owned)
-            .collect(),
-        youtube: m.meal.youtube.clone().filter(|u| u.starts_with("https://")),
-    }
+    let thumb = m
+        .meal
+        .thumbnail
+        .as_deref()
+        .and_then(thumb_file)
+        .map(|f| format!("/vignette/{f}"));
+    crate::recipes::card(m, thumb)
 }
 
 /// `https://www.themealdb.com/images/media/meals/abc123.jpg` → `abc123.jpg`.

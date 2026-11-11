@@ -7,3 +7,4 @@ target/
 .swiftpm/
 DerivedData/
 /ios/FrigoVide.xcodeproj/
+/site/dist/

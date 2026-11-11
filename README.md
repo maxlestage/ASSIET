@@ -96,6 +96,21 @@ wasm-bindgen --target web --no-typescript --remove-name-section --remove-produce
 cargo run --release                    # http://localhost:3000 (PORT sinon)
 ```
 
+### Sur GitHub Pages
+
+Le workflow `.github/workflows/pages.yml` publie le site à chaque push sur `master`, sur
+<https://maxlestage.github.io/ASSIET/>. Il construit le bundle WebAssembly, puis
+`cargo run --release -- export dist` écrit les pages en fichiers statiques (`BASE_PATH`
+préfixe les adresses). Sans serveur, la démo interroge TheMealDB directement depuis le
+navigateur et classe les recettes avec `frigo-core` compilé en WebAssembly.
+
+À faire une seule fois dans le dépôt : **Settings → Pages → Source : GitHub Actions**.
+
+```sh
+cd site
+BASE_PATH=/ASSIET cargo run --release -- export dist   # pour essayer en local
+```
+
 Routes : `/` (la page), `/api/recettes?i=poulet,riz&strict=1` (JSON, gardé 15 minutes),
 `/vignette/{fichier}` (les photos de TheMealDB relayées : la page n'accepte que ses propres
 images), `/manifest.webmanifest` (installable).

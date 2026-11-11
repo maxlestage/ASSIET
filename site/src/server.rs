@@ -3,6 +3,7 @@
 //! site (la page n'accepte que ses propres images).
 
 mod api;
+pub mod export;
 mod home;
 
 use std::path::{Path, PathBuf};

@@ -5,6 +5,7 @@
 //! (`client`) que dans le navigateur.
 
 pub mod islands;
+pub mod recipes;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod server;

@@ -1,0 +1,71 @@
+# Déploie le site de présentation sur GitHub Pages à chaque push sur master.
+#
+# Le site est une application Paquets : on construit le bundle WebAssembly, puis
+# `frigo-site export` écrit toutes les pages en fichiers statiques. Sur Pages, il n'y a pas
+# de serveur : la démo interroge TheMealDB directement depuis le navigateur et classe
+# les recettes avec frigo-core compilé en WebAssembly.
+#
+# À faire une fois : Settings → Pages → Build and deployment → Source : « GitHub Actions ».
+name: Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Un seul déploiement à la fois ; celui en cours va jusqu'au bout.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    name: Construire le site statique
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: site
+      - id: pages
+        uses: actions/configure-pages@v6
+      - name: wasm-bindgen (la version du Cargo.lock)
+        run: cargo install wasm-bindgen-cli --version 0.2.130 --locked
+      - name: Le bundle du navigateur
+        run: |
+          cargo build --lib --target wasm32-unknown-unknown --profile wasm-release --locked
+          wasm-bindgen --target web --no-typescript --remove-name-section --remove-producers-section \
+            --out-dir pkg target/wasm32-unknown-unknown/wasm-release/frigo_site.wasm
+      - name: Les pages statiques
+        env:
+          # `/ASSIET` pour https://maxlestage.github.io/ASSIET/ (vide avec un domaine perso).
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+        run: cargo run --release --locked -- export dist
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site/dist
+
+  deploy:
+    name: Déployer
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
