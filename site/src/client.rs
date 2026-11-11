@@ -1,6 +1,6 @@
 //! Le bundle du navigateur : rend les îlots interactifs et anime la page (apparitions au
-//! défilement, profondeur 3D qui suit le défilement, inclinaison des cartes, compteurs).
-//! Sans lui, la page reste lisible et complète.
+//! défilement, barre de progression, barre de navigation). Sans lui, la page reste
+//! lisible et complète.
 
 use std::cell::Cell;
 use std::rc::Rc;
@@ -21,10 +21,7 @@ pub fn start() {
     reveals();
     // Seulement maintenant, le CSS peut cacher ce qui n'est pas encore apparu.
     let _ = root.class_list().add_1("hydrated");
-    scroll_depth(&root);
-    if matches("(hover: hover) and (pointer: fine)") && !reduced_motion() {
-        tilt();
-    }
+    scroll_state(&root);
 }
 
 fn window() -> web_sys::Window {
@@ -33,18 +30,6 @@ fn window() -> web_sys::Window {
 
 fn document() -> web_sys::Document {
     window().document().expect("document")
-}
-
-fn matches(query: &str) -> bool {
-    window()
-        .match_media(query)
-        .ok()
-        .flatten()
-        .is_some_and(|m| m.matches())
-}
-
-pub fn reduced_motion() -> bool {
-    matches("(prefers-reduced-motion: reduce)")
 }
 
 fn all(selector: &str) -> Vec<HtmlElement> {
@@ -111,9 +96,9 @@ fn reveals() {
     callback.forget();
 }
 
-/// `--scroll` (0 → 1 sur la page) et `--view` (0 → 1 pour chaque `[data-depth]` qui
-/// traverse l'écran) : le CSS en tire la profondeur 3D (téléphone, terminal, étapes).
-fn scroll_depth(root: &HtmlElement) {
+/// `--scroll` (0 → 1 sur la page, pour la barre de progression) et `.scrolled` (la barre
+/// de navigation change de fond).
+fn scroll_state(root: &HtmlElement) {
     let root = root.clone();
     let pending = Rc::new(Cell::new(false));
     let update = {
@@ -133,17 +118,9 @@ fn scroll_depth(root: &HtmlElement) {
                 .style()
                 .set_property("--scroll", &format!("{:.4}", (y / total).clamp(0.0, 1.0)));
             let _ = root.class_list().toggle_with_force("scrolled", y > 24.0);
-            for el in all("[data-depth]") {
-                let rect = el.get_bounding_client_rect();
-                let progress = ((height - rect.top()) / (height + rect.height())).clamp(0.0, 1.0);
-                let _ = el.style().set_property("--view", &format!("{progress:.4}"));
-            }
         }
     };
     update();
-    if reduced_motion() {
-        return;
-    }
     let update = Rc::new(update);
     let schedule = move |_: web_sys::Event| {
         if pending.replace(true) {
@@ -157,29 +134,6 @@ fn scroll_depth(root: &HtmlElement) {
     let s = schedule.clone();
     on_passive::<web_sys::Event>(&window(), "scroll", move |e| s(e));
     on_passive::<web_sys::Event>(&window(), "resize", move |e| schedule(e));
-}
-
-/// Les `[data-tilt]` s'inclinent vers le pointeur (souris seulement).
-fn tilt() {
-    for el in all("[data-tilt]") {
-        let target = el.clone();
-        on_passive::<web_sys::PointerEvent>(&el, "pointermove", move |e| {
-            let rect = target.get_bounding_client_rect();
-            let x = (f64::from(e.client_x()) - rect.left()) / rect.width() - 0.5;
-            let y = (f64::from(e.client_y()) - rect.top()) / rect.height() - 0.5;
-            let style = target.style();
-            let _ = style.set_property("--rx", &format!("{:.2}deg", -y * 12.0));
-            let _ = style.set_property("--ry", &format!("{:.2}deg", x * 14.0));
-            let _ = style.set_property("--mx", &format!("{:.1}%", (x + 0.5) * 100.0));
-            let _ = style.set_property("--my", &format!("{:.1}%", (y + 0.5) * 100.0));
-        });
-        let target = el.clone();
-        on_passive::<web_sys::PointerEvent>(&el, "pointerleave", move |_| {
-            let style = target.style();
-            let _ = style.set_property("--rx", "0deg");
-            let _ = style.set_property("--ry", "0deg");
-        });
-    }
 }
 
 /// `GET /api/recettes?i=…&strict=…`, puis `done(réponse)`.

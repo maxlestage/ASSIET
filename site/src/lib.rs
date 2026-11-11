@@ -1,12 +1,10 @@
 //! Le site de **Frigo vide**, écrit avec Paquets.
 //!
 //! La bibliothèque contient ce que le serveur et le navigateur partagent : les îlots
-//! (rendus en HTML par le serveur, rendus interactifs par le bundle WebAssembly) et la
-//! scène 3D. Le serveur (`server`) n'existe qu'en natif, le mouvement de la page
+//! (rendus en HTML par le serveur, rendus interactifs par le bundle WebAssembly). Le serveur (`server`) n'existe qu'en natif, le mouvement de la page
 //! (`client`) que dans le navigateur.
 
 pub mod islands;
-pub mod scene;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod server;
@@ -18,5 +16,7 @@ mod client;
 pub type Island = fn(&str) -> paquets::active::Node;
 
 /// Les îlots de la page, par nom : le même tableau sert au serveur et au navigateur.
-pub const ISLANDS: [(&str, Island); 2] =
-    [("assiette", islands::assiette), ("frigo", islands::frigo)];
+pub const ISLANDS: [(&str, Island); 2] = [
+    ("frigo-dessin", islands::frigo_dessin),
+    ("frigo", islands::frigo),
+];

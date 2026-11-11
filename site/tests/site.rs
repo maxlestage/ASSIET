@@ -8,12 +8,12 @@ async fn the_home_page_has_its_text_and_islands() {
     assert_eq!(res.status(), 200);
     let html = res.text();
     assert!(html.contains("<html lang=\"fr\""));
-    assert!(html.contains("Ouvrez le frigo"));
+    assert!(html.contains("on mange"));
     assert!(
         html.contains("active-island"),
         "les îlots sont rendus par le serveur"
     );
-    assert!(html.contains("canvas"), "la scène 3D a son canvas");
+    assert!(html.contains("fridge__door"), "le frigo dessiné est rendu");
     assert!(html.contains("/site.css?v="));
     for id in ["demo", "terminal", "tui", "ios", "installer"] {
         assert!(html.contains(&format!("id=\"{id}\"")), "section #{id}");

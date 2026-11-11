@@ -9,7 +9,7 @@ moins de choses, qui utilise le plus votre frigo, et la plus rapide à préparer
 |---|---|---|
 | Le cœur | `crates/frigo-core` | Rust 2024, tokio, reqwest 0.13, serde |
 | La CLI et la TUI | `crates/frigo` | clap 4.6, ratatui 0.30, crossterm 0.29, color-eyre |
-| Le site de présentation | `site/` | [Paquets](https://github.com/maxlestage/Paquets), îlots WebAssembly, 3D WebGL 2 (`paquets::ecs` et sa physique) |
+| Le site de présentation | `site/` | [Paquets](https://github.com/maxlestage/Paquets), îlots WebAssembly, design 2D plat et coloré |
 | L'app iPhone | `ios/` | Swift 6.4, SwiftUI (iOS 26), SwiftData, Swift Testing, XcodeGen |
 
 ## La CLI
@@ -79,10 +79,12 @@ liste d'ingrédients ──► normalisation (français → anglais, pluriels, a
 
 Une application [Paquets](https://github.com/maxlestage/Paquets) : la page est rendue par le
 serveur (lisible sans JavaScript), les parties interactives sont des îlots Rust compilés en
-WebAssembly. Une assiette en 3D où tombent des ingrédients (physique d'Active), une démo en
-direct qui appelle `/api/recettes` (le même `frigo-core`), un terminal animé, la TUI, un
-iPhone en CSS 3D qui tourne au défilement. Conçu pour le mobile d'abord, sans aucun
-défilement horizontal (vérifié à 320, 375 et 1440 px).
+WebAssembly. Un style plat en 2D, très coloré (bordures épaisses, ombres décalées) : un frigo
+dessiné qui s'ouvre et se remplit quand on le touche, un bandeau d'ingrédients qui défile,
+une démo en direct qui appelle `/api/recettes` (le même `frigo-core`), un terminal animé, la
+TUI et l'iPhone dessinés à plat. Conçu pour le mobile d'abord, sans aucun défilement
+horizontal (vérifié à 320, 375 et 1440 px). Le bundle WebAssembly pèse environ 85 ko
+compressé.
 
 ```sh
 cd site
