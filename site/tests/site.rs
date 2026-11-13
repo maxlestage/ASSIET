@@ -98,3 +98,47 @@ async fn the_share_card_points_to_the_public_url() {
     assert!(html.contains("footer__bottom"), "le pied de page");
     assert!(html.contains("Signaler un problème"));
 }
+
+#[tokio::test]
+async fn the_site_speaks_french_english_and_spanish() {
+    let client = frigo_site::server::app().test().await;
+    let cases = [
+        ("/", "<html lang=\"fr\"", "Trois écrans, un repas", "og.png"),
+        (
+            "/en/",
+            "<html lang=\"en\"",
+            "Three screens, one meal",
+            "og-en.png",
+        ),
+        (
+            "/es/",
+            "<html lang=\"es\"",
+            "Tres pantallas, una comida",
+            "og-es.png",
+        ),
+    ];
+    for (path, lang, title, og) in cases {
+        let res = client.get(path).await;
+        assert_eq!(res.status(), 200, "{path}");
+        let html = res.text();
+        assert!(html.contains(lang), "{path} : la langue de la page");
+        assert!(html.contains(title), "{path} : le texte traduit");
+        assert!(html.contains(og), "{path} : l'image de partage traduite");
+        for code in ["fr", "en", "es"] {
+            assert!(
+                html.contains(&format!("hreflang=\"{code}\"")),
+                "{path} : le lien vers la version {code}"
+            );
+        }
+        assert!(
+            html.contains("aria-current=\"true\""),
+            "{path} : la langue choisie"
+        );
+    }
+    // Sans la barre finale, la page existe aussi.
+    assert_eq!(client.get("/en").await.status(), 200);
+    // Une page inconnue sous /es/ répond en espagnol.
+    let missing = client.get("/es/nada").await;
+    assert_eq!(missing.status(), 404);
+    assert!(missing.text().contains("Esta despensa está vacía"));
+}

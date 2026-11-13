@@ -11,9 +11,21 @@ struct ContentView: View {
     @FocusState private var typing: Bool
     @Namespace private var cards
 
-    static let suggestions = [
-        "poulet", "riz", "oignon", "ail", "tomate", "œufs", "pâtes", "fromage", "carotte",
-        "pomme de terre", "lait", "citron",
+    /// Des idées d'ingrédients, dans la langue de l'app : FrigoKit comprend le français,
+    /// l'anglais et l'espagnol (voir `Localizable.xcstrings`).
+    static let suggestions: [String] = [
+        String(localized: "poulet", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "riz", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "oignon", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "ail", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "tomate", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "œufs", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "pâtes", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "fromage", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "carotte", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "pomme de terre", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "lait", comment: "Suggestion d'ingrédient, en minuscules"),
+        String(localized: "citron", comment: "Suggestion d'ingrédient, en minuscules"),
     ]
 
     var body: some View {
@@ -62,7 +74,7 @@ struct ContentView: View {
                     }
                     .buttonStyle(ChipStyle(tint: .mint))
                     .transition(.scale(scale: 0.3).combined(with: .opacity))
-                    .accessibilityLabel("Retirer \(item.name)")
+                    .accessibilityLabel(Text("Retirer \(item.name)"))
                 }
                 if items.isEmpty {
                     Text("Le frigo est vide…").foregroundStyle(.secondary)
@@ -87,10 +99,15 @@ struct ContentView: View {
             FlowLayout(spacing: 6) {
                 ForEach(Self.suggestions, id: \.self) { suggestion in
                     let isIn = items.contains { $0.name == suggestion }
-                    Button("+ \(suggestion)") { add(suggestion) }
-                        .buttonStyle(ChipStyle(tint: .secondary))
-                        .opacity(isIn ? 0.4 : 1)
-                        .disabled(isIn)
+                    Button {
+                        add(suggestion)
+                    } label: {
+                        Text(verbatim: "+ \(suggestion)")
+                    }
+                    .buttonStyle(ChipStyle(tint: .secondary))
+                    .accessibilityLabel(Text("Ajouter \(suggestion)"))
+                    .opacity(isIn ? 0.4 : 1)
+                    .disabled(isIn)
                 }
             }
 
@@ -101,10 +118,8 @@ struct ContentView: View {
                 typing = false
                 kitchen.search(items.map(\.name))
             } label: {
-                Label(
-                    kitchen.phase == .searching ? "Je fouille…" : "Trouver une recette",
-                    systemImage: "refrigerator.fill"
-                )
+                let title: LocalizedStringKey = kitchen.phase == .searching ? "Je fouille…" : "Trouver une recette"
+                Label(title, systemImage: "refrigerator.fill")
                 .symbolEffect(.bounce, value: kitchen.phase == .searching)
                 .frame(maxWidth: .infinity, minHeight: 34)
             }
@@ -179,12 +194,17 @@ struct FridgeHeader: View {
                 } animation: { _ in .easeInOut(duration: 2.4) }
             VStack(alignment: .leading) {
                 Text("Le frigo est vide ?").font(.title2.bold())
-                Text(count == 0 ? "Pas l'assiette." : "\(count) ingrédient\(count > 1 ? "s" : "") au frais")
+                Text(subtitle)
                     .foregroundStyle(.secondary)
                     .contentTransition(.numericText())
             }
         }
         .padding(.top, 8)
+    }
+
+    /// « 1 ingrédient » / « 2 ingrédients » : le pluriel est dans `Localizable.xcstrings`.
+    private var subtitle: LocalizedStringKey {
+        count == 0 ? "Pas l'assiette." : "\(count) ingrédients au frais"
     }
 }
 
