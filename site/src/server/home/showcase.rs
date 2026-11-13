@@ -365,9 +365,9 @@ pub fn features(l: Lang) -> Element {
                 "Todo lo que hace falta, nada más",
             ),
             Some(l.t(
-                "Pas de compte, pas de publicité, pas d'abonnement. Juste la bonne recette.",
-                "No account, no ads, no subscription. Just the right recipe.",
-                "Sin cuenta, sin anuncios, sin suscripción. Solo la receta adecuada.",
+                "Pas de compte à créer, pas de liste de courses. Juste la bonne recette.",
+                "No account to create, no shopping list. Just the right recipe.",
+                "Sin cuenta que crear, sin lista de la compra. Solo la receta adecuada.",
             )),
         ))
         .child(
@@ -420,11 +420,11 @@ pub fn numbers(l: Lang) -> Element {
             "sky",
         ),
         (
-            "0",
+            "3",
             l.t(
-                "compte, pub ou abonnement",
-                "accounts, ads or subscriptions",
-                "cuentas, anuncios o suscripciones",
+                "langues\u{a0}: français, anglais, espagnol",
+                "languages: English, French, Spanish",
+                "idiomas: español, inglés, francés",
             ),
             "tomato",
         ),
@@ -771,11 +771,11 @@ pub fn privacy(l: Lang) -> Element {
         ),
         (
             "🙅",
-            l.t("Ni compte ni pub", "No account, no ads", "Ni cuenta ni anuncios"),
+            l.t("Ni compte ni traçage", "No account, no tracking", "Ni cuenta ni rastreo"),
             l.t(
-                "Pas d'inscription, pas de publicité, pas de traçage. L'app ne sait pas qui vous êtes.",
-                "No sign-up, no ads, no tracking. The app doesn't know who you are.",
-                "Sin registro, sin anuncios, sin rastreo. La app no sabe quién eres.",
+                "Pas d'inscription, pas de traçage. L'app ne sait pas qui vous êtes.",
+                "No sign-up, no tracking. The app doesn't know who you are.",
+                "Sin registro, sin rastreo. La app no sabe quién eres.",
             ),
         ),
     ];
@@ -830,9 +830,9 @@ pub fn faq(l: Lang) -> Element {
         (
             l.t("L'app est-elle gratuite\u{a0}?", "Is the app free?", "¿La app es gratis?"),
             l.t(
-                "Oui, entièrement\u{a0}: pas de publicité, pas d'abonnement, pas d'achat intégré. Son code est ouvert, sous licence MIT.",
-                "Yes, completely: no ads, no subscription, no in-app purchases. Its code is open source, under the MIT license.",
-                "Sí, del todo: sin anuncios, sin suscripción, sin compras dentro de la app. Su código es abierto, con licencia MIT.",
+                "Elle est gratuite à télécharger, avec des fonctions premium en option. Son code est ouvert, sous licence MIT.",
+                "It's free to download, with optional premium features. Its code is open source, under the MIT license.",
+                "Es gratis para descargar, con funciones premium opcionales. Su código es abierto, con licencia MIT.",
             ),
         ),
         (
@@ -956,9 +956,9 @@ pub fn app_store(l: Lang) -> Element {
                             "Frigo vide llega al App Store",
                         )))
                         .child(p().class("lead").text(l.t(
-                            "Gratuite, sans compte et sans publicité. En attendant, suivez le projet sur GitHub, ou partagez-le à ceux qui ont toujours un frigo à moitié vide.",
-                            "Free, no account and no ads. In the meantime, follow the project on GitHub, or share it with anyone whose fridge is always half empty.",
-                            "Gratis, sin cuenta y sin anuncios. Mientras tanto, sigue el proyecto en GitHub o compártelo con quien siempre tiene la nevera medio vacía.",
+                            "Gratuite à télécharger, sans compte. En attendant, suivez le projet sur GitHub, ou partagez-le à ceux qui ont toujours un frigo à moitié vide.",
+                            "Free to download, no account. In the meantime, follow the project on GitHub, or share it with anyone whose fridge is always half empty.",
+                            "Gratis para descargar, sin cuenta. Mientras tanto, sigue el proyecto en GitHub o compártelo con quien siempre tiene la nevera medio vacía.",
                         )))
                         .child(
                             div()
