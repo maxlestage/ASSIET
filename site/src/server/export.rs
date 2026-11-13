@@ -8,7 +8,7 @@
 use std::io;
 use std::path::{Path, PathBuf};
 
-use super::{app, site_dir};
+use super::{app, share, site_dir};
 
 /// Écrit le site dans `out`, avec les liens derrière `base` (`""` ou `/ASSIET`).
 /// Renvoie le nombre de fichiers écrits.
@@ -18,6 +18,13 @@ pub async fn export(out: &Path, base: &str) -> io::Result<usize> {
     // Paquets trouve `pkg/` (le bundle du navigateur) dans le dossier courant.
     let dir = std::path::absolute(site_dir())?;
     std::env::set_current_dir(&dir)?;
+    // Les liens de partage et le QR code visent l'adresse publique du site : `SITE_URL`
+    // (le workflow de Pages la donne), sinon celle de GitHub Pages.
+    let url = std::env::var("SITE_URL")
+        .ok()
+        .and_then(|u| share::normalize_url(&u))
+        .unwrap_or_else(|| share::DEFAULT_URL.to_owned());
+    let _ = share::PUBLIC_URL.set(url);
     if !dir.join("pkg").is_dir() {
         eprintln!("attention : site/pkg manque, la page ne sera pas interactive (voir le README)");
     }
@@ -61,13 +68,6 @@ pub async fn export(out: &Path, base: &str) -> io::Result<usize> {
         let body = String::from_utf8_lossy(&get(file, 200).await?).into_owned();
         write(file, with_base_everywhere(&body, &base).as_bytes())?;
     }
-    for icon in [
-        "/paquets/icon-192.png",
-        "/paquets/icon-512.png",
-        "/paquets/icon-maskable-512.png",
-    ] {
-        write(icon, &get(icon, 200).await?)?;
-    }
     write(
         "robots.txt",
         format!("User-agent: *\nAllow: {base}/\n").as_bytes(),
@@ -109,6 +109,7 @@ pub fn static_page(html: &str, base: &str) -> String {
     if !base.is_empty() {
         for prefix in [
             "\"/\"",
+            "\"/#",
             "\"/assets/",
             "\"/pkg/",
             "\"/paquets/",
@@ -162,10 +163,11 @@ mod tests {
 
     #[test]
     fn only_known_urls_move_behind_the_base() {
-        let html = r#"<div class="site"><a href="/">x</a><img src="/assets/a.svg"/><link href="/site.css?v=1"/><script src="/pkg/x.js"></script></div>"#;
+        let html = r#"<div class="site"><a href="/">x</a><a href="/#demo">d</a><img src="/assets/a.svg"/><link href="/site.css?v=1"/><script src="/pkg/x.js"></script></div>"#;
         let out = static_page(html, "/ASSIET");
         assert!(out.contains(r#"class="site" data-mode="static""#));
         assert!(out.contains(r#"href="/ASSIET/""#));
+        assert!(out.contains(r#"href="/ASSIET/#demo""#));
         assert!(out.contains(r#"src="/ASSIET/assets/a.svg"/>"#));
         assert!(out.contains(r#"href="/ASSIET/site.css?v=1"/>"#));
         assert!(out.contains(r#"src="/ASSIET/pkg/x.js""#));
