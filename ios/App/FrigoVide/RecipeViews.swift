@@ -60,7 +60,7 @@ struct RecipeCard: View {
 }
 
 struct Tag: View {
-    let text: String
+    let text: LocalizedStringKey
     let systemImage: String
     let tint: Color
 
@@ -99,7 +99,11 @@ struct RecipeDetailView: View {
 
                 HStack {
                     Tag(text: "≈ \(match.minutes) min", systemImage: "timer", tint: .purple)
-                    Tag(text: "\(Int((match.coverage * 100).rounded())) % du frigo", systemImage: "refrigerator", tint: .mint)
+                    Tag(
+                        text: "\(match.coverage, format: .percent.precision(.fractionLength(0))) du frigo",
+                        systemImage: "refrigerator",
+                        tint: .mint
+                    )
                 }
 
                 section("Il vous faut") {
@@ -123,7 +127,7 @@ struct RecipeDetailView: View {
                             }
                         } label: {
                             HStack(alignment: .top, spacing: 12) {
-                                Text("\(index + 1)")
+                                Text(index + 1, format: .number)
                                     .font(.headline.monospacedDigit())
                                     .frame(width: 30, height: 30)
                                     .background(done.contains(index) ? .mint : .orange.opacity(0.25), in: .circle)
@@ -154,7 +158,7 @@ struct RecipeDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func section(_ title: String, @ViewBuilder content: () -> some View) -> some View {
+    private func section(_ title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(title).font(.title3.bold())
             content()

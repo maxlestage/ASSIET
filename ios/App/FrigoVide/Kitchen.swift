@@ -25,7 +25,7 @@ final class Kitchen {
     func search(_ fridge: [String]) {
         task?.cancel()
         guard !fridge.isEmpty else {
-            phase = .failed(MealDB.Failure.emptyFridge.localizedDescription)
+            phase = .failed(Self.message(for: MealDB.Failure.emptyFridge))
             return
         }
         phase = .searching
@@ -40,8 +40,21 @@ final class Kitchen {
                 }
             } catch is CancellationError {
             } catch {
-                phase = .failed(error.localizedDescription)
+                phase = .failed(Self.message(for: error))
             }
+        }
+    }
+
+    /// Le message d'erreur dans la langue de l'app : ceux de FrigoKit sont en français, ceux
+    /// du système (réseau…) sont déjà traduits.
+    private static func message(for error: any Error) -> String {
+        switch error as? MealDB.Failure {
+        case .emptyFridge?:
+            String(localized: "Le frigo est vide : ajoutez au moins un ingrédient.")
+        case .http(let status)?:
+            String(localized: "TheMealDB a répondu \(status).")
+        case nil:
+            error.localizedDescription
         }
     }
 }

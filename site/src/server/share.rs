@@ -6,6 +6,8 @@ use std::sync::OnceLock;
 use paquets::prelude::*;
 use qrcodegen::{QrCode, QrCodeEcc};
 
+use crate::i18n::Lang;
+
 /// L'adresse du site publié sur GitHub Pages, quand aucune autre n'est connue.
 pub const DEFAULT_URL: &str = "https://maxlestage.github.io/ASSIET/";
 
@@ -13,7 +15,13 @@ pub const DEFAULT_URL: &str = "https://maxlestage.github.io/ASSIET/";
 pub static PUBLIC_URL: OnceLock<String> = OnceLock::new();
 
 /// Le texte qui accompagne le lien partagé.
-pub const SHARE_TEXT: &str = "Le frigo est vide ? Pas l'assiette. Frigo vide trouve la meilleure recette avec ce qu'il te reste :";
+pub fn share_text(lang: Lang) -> &'static str {
+    lang.t(
+        "Le frigo est vide ? Pas l'assiette. Frigo vide trouve la meilleure recette avec ce qu'il te reste :",
+        "Empty fridge? Full plate. Frigo vide finds the best recipe with whatever you have left:",
+        "¿La nevera vacía? El plato no. Frigo vide encuentra la mejor receta con lo que te queda:",
+    )
+}
 
 /// L'adresse publique du site, avec un `/` final : celle imposée par l'export, sinon
 /// `SITE_URL`, sinon celle que le visiteur a demandée (`Host`, derrière le proxy de Heroku
@@ -103,11 +111,16 @@ pub struct Network {
 }
 
 /// Les liens de partage de `url`, du plus courant au moins courant.
-pub fn networks(url: &str) -> Vec<Network> {
+pub fn networks(url: &str, lang: Lang) -> Vec<Network> {
+    let text = share_text(lang);
     let u = encode(url);
-    let t = encode(SHARE_TEXT);
-    let both = encode(&format!("{SHARE_TEXT} {url}"));
-    let subject = encode("Une idée pour ce soir : Frigo vide");
+    let t = encode(text);
+    let both = encode(&format!("{text} {url}"));
+    let subject = encode(lang.t(
+        "Une idée pour ce soir : Frigo vide",
+        "An idea for tonight: Frigo vide",
+        "Una idea para esta noche: Frigo vide",
+    ));
     vec![
         Network {
             name: "WhatsApp",
@@ -155,7 +168,7 @@ pub fn networks(url: &str) -> Vec<Network> {
 }
 
 /// Le QR code de `url`, en SVG : un seul chemin, net à toutes les tailles.
-pub fn qr_svg(url: &str) -> String {
+pub fn qr_svg(url: &str, lang: Lang) -> String {
     let Ok(qr) = QrCode::encode_text(url, QrCodeEcc::Medium) else {
         return String::new();
     };
@@ -185,8 +198,9 @@ pub fn qr_svg(url: &str) -> String {
         }
     }
     format!(
-        r##"<svg class="qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {full} {full}" shape-rendering="crispEdges" role="img" aria-label="QR code vers {label}"><rect width="{full}" height="{full}" fill="#fff"/><path fill="#1f1a3d" d="{path}"/></svg>"##,
+        r##"<svg class="qr" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {full} {full}" shape-rendering="crispEdges" role="img" aria-label="{qr} {label}"><rect width="{full}" height="{full}" fill="#fff"/><path fill="#1f1a3d" d="{path}"/></svg>"##,
         label = display_url(url),
+        qr = lang.t("QR code vers", "QR code to", "Código QR hacia"),
     )
 }
 
@@ -234,7 +248,7 @@ mod tests {
     #[test]
     fn share_links_are_encoded() {
         assert_eq!(encode("a b&c/é"), "a%20b%26c%2F%C3%A9");
-        let links = networks("https://exemple.fr/");
+        let links = networks("https://exemple.fr/", Lang::Fr);
         assert!(links.iter().all(|n| !n.href.contains(' ')));
         assert!(links.iter().any(|n| n.href
             == "https://www.facebook.com/sharer/sharer.php?u=https%3A%2F%2Fexemple.fr%2F"));
@@ -242,7 +256,7 @@ mod tests {
 
     #[test]
     fn the_qr_code_is_an_svg() {
-        let svg = qr_svg(DEFAULT_URL);
+        let svg = qr_svg(DEFAULT_URL, Lang::Fr);
         assert!(svg.starts_with("<svg class=\"qr\""));
         assert!(svg.contains("<path fill=\"#1f1a3d\" d=\"M"));
         assert!(svg.contains("maxlestage.github.io/ASSIET"));

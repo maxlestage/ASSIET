@@ -40,6 +40,35 @@ struct NamesTests {
         #expect(Names.canonical(input) == expected)
     }
 
+    @Test(arguments: [
+        ("pollo", "chicken"),
+        ("Huevos", "egg"),
+        ("pechugas de pollo", "chicken breast"),
+        ("Patatas", "potato"),
+        ("papas", "potato"),
+        ("tomates", "tomato"),
+        ("cebollas", "onion"),
+        ("limones", "lemon"),
+        ("limón", "lemon"),
+        ("champiñones", "mushroom"),
+        ("aceite de oliva", "olive oil"),
+        // Des mots déjà anglais : jamais détournés.
+        ("pasta", "pasta"),
+        ("chorizo", "chorizo"),
+        ("salmon", "salmon"),
+    ])
+    func spanish(input: String, expected: String) {
+        #expect(Names.canonical(input) == expected)
+    }
+
+    @Test func comparesSpanishWordByWord() {
+        #expect(Names.same("arroz", "brown rice"))
+        #expect(Names.same("salsa de soja", "Soy Sauce"))
+        #expect(Names.apiName("pechuga de pollo") == "chicken_breast")
+        #expect(Names.isPantry("sal"))
+        #expect(!Names.same("huevo", "eggplant"))
+    }
+
     @Test func comparesWordByWord() {
         #expect(Names.same("riz", "brown rice"))
         #expect(Names.same("sauce soja", "Soy Sauce"))
@@ -62,6 +91,14 @@ struct RankingTests {
         #expect(m.missing.contains("cornstarch"))
         #expect(m.used.count == 4)
         #expect(m.coverage > 0.5)
+    }
+
+    @Test func understandsSpanish() throws {
+        let meal = try #require(try parseMeals(fixture("teriyaki")).first)
+        let m = evaluate(meal, fridge: ["pollo", "arroz", "salsa de soja", "ajo"])
+        #expect(m.have.contains("chicken breasts"))
+        #expect(m.missing.contains("cornstarch"))
+        #expect(m.used.count == 4)
     }
 
     @Test func ranksAndFilters() throws {

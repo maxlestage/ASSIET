@@ -60,6 +60,10 @@ pub async fn export(out: &Path, base: &str) -> io::Result<usize> {
 
     let home = String::from_utf8_lossy(&get("/", 200).await?).into_owned();
     write("index.html", static_page(&home, &base).as_bytes())?;
+    for (path, file) in [("/en/", "en/index.html"), ("/es/", "es/index.html")] {
+        let page = String::from_utf8_lossy(&get(path, 200).await?).into_owned();
+        write(file, static_page(&page, &base).as_bytes())?;
+    }
     let missing = String::from_utf8_lossy(&get("/introuvable", 404).await?).into_owned();
     write("404.html", static_page(&missing, &base).as_bytes())?;
 
@@ -110,6 +114,8 @@ pub fn static_page(html: &str, base: &str) -> String {
         for prefix in [
             "\"/\"",
             "\"/#",
+            "\"/en/",
+            "\"/es/",
             "\"/assets/",
             "\"/pkg/",
             "\"/paquets/",
