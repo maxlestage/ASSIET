@@ -775,6 +775,55 @@ pre {
 .marquee__item:nth-child(5n + 4) { color: var(--peach); }
 .marquee__item:nth-child(5n + 5) { color: #b9a9ff; }
 
+/* Les autres bandeaux : une couleur, l'inclinaison inverse, et l'autre sens. */
+.marquee--tomato,
+.marquee--mint {
+  transform: rotate(1.5deg) scale(1.05);
+}
+
+.marquee--tomato .marquee__track,
+.marquee--mint .marquee__track {
+  animation-direction: reverse;
+}
+
+.marquee--tomato {
+  background: var(--tomato);
+}
+
+.marquee--sun {
+  background: var(--sun);
+  color: var(--ink);
+  transform: rotate(-1deg) scale(1.05);
+}
+
+.marquee--mint {
+  background: var(--mint);
+  color: var(--ink);
+}
+
+.marquee--tomato .marquee__item:nth-child(n),
+.marquee--sun .marquee__item:nth-child(n),
+.marquee--mint .marquee__item:nth-child(n) {
+  color: inherit;
+}
+
+.marquee--tomato .marquee__item:nth-child(even) {
+  color: var(--sun-l);
+}
+
+.marquee--sun .marquee__item:nth-child(even) {
+  color: var(--tomato);
+}
+
+.marquee--mint .marquee__item:nth-child(even) {
+  color: #fff;
+}
+
+/* Le bandeau du pied de page chevauche son bord supérieur. */
+.footer > .marquee {
+  margin-block: -26px 0;
+}
+
 @keyframes scroll-x {
   to {
     transform: translateX(-100%);
@@ -2065,7 +2114,7 @@ kbd {
 /* ───────── Pied de page, 404 ───────── */
 
 .footer {
-  margin-top: 40px;
+  margin-top: 64px;
   border-top: var(--border);
   background: var(--ink);
   color: #fff;
