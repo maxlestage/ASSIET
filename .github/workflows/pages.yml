@@ -54,6 +54,8 @@ jobs:
         env:
           # `/ASSIET` pour https://maxlestage.github.io/ASSIET/ (vide avec un domaine perso).
           BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          # L'adresse complète, pour la carte de partage (QR code, liens) et les aperçus.
+          SITE_URL: ${{ steps.pages.outputs.base_url }}
         run: cargo run --release --locked -- export dist
       - uses: actions/upload-pages-artifact@v5
         with:
