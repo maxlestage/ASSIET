@@ -1,9 +1,8 @@
 # Déploie le site de présentation sur GitHub Pages à chaque push sur master.
 #
 # Le site est une application Paquets : on construit le bundle WebAssembly, puis
-# `frigo-site export` écrit toutes les pages en fichiers statiques. Sur Pages, il n'y a pas
-# de serveur : la démo interroge TheMealDB directement depuis le navigateur et classe
-# les recettes avec frigo-core compilé en WebAssembly.
+# `frigo-site export` écrit la page en fichiers statiques. La page ne fait rien
+# elle-même (c'est la vitrine de l'app iPhone) : aucun serveur n'est nécessaire.
 #
 # À faire une fois : Settings → Pages → Build and deployment → Source : « GitHub Actions ».
 name: Pages

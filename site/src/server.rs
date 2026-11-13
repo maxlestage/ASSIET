@@ -1,8 +1,6 @@
-//! Le serveur : la page d'accueil, l'API de la démo (`/api/recettes`, qui utilise
-//! `frigo-core`, le même cœur que la CLI) et les vignettes de TheMealDB servies par le
-//! site (la page n'accepte que ses propres images).
+//! Le serveur : la vitrine de l'app iPhone, une page rendue d'avance. Le site ne cherche
+//! rien lui-même : tout se passe dans l'app.
 
-mod api;
 pub mod export;
 mod home;
 pub mod share;
@@ -45,11 +43,10 @@ pub fn app() -> App {
                 .header("cache-control", "no-cache")
         }
     });
-    api::mount(&mut app);
     app.get("/robots.txt", |_req: Request| async {
         Response::new()
             .header("content-type", "text/plain; charset=utf-8")
-            .send("User-agent: *\nAllow: /\nDisallow: /api/\n")
+            .send("User-agent: *\nAllow: /\n")
     });
     app.pwa(
         Pwa::new("Frigo vide")
