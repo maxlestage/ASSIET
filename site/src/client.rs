@@ -24,6 +24,15 @@ pub fn start() {
     sharing();
 }
 
+/// La langue de la page (`<html lang>`).
+fn lang() -> crate::i18n::Lang {
+    let code = document()
+        .document_element()
+        .and_then(|root| root.get_attribute("lang"))
+        .unwrap_or_default();
+    crate::i18n::Lang::from_code(&code)
+}
+
 fn window() -> web_sys::Window {
     web_sys::window().expect("window")
 }
@@ -202,7 +211,14 @@ fn sharing() {
                     copied_feedback(&target);
                 } else {
                     // Pas de presse-papiers (page non sécurisée, vieux navigateur).
-                    let _ = window().prompt_with_message_and_default("Copiez ce lien\u{a0}:", &url);
+                    let _ = window().prompt_with_message_and_default(
+                        lang().t(
+                            "Copiez ce lien\u{a0}:",
+                            "Copy this link:",
+                            "Copia este enlace:",
+                        ),
+                        &url,
+                    );
                 }
             });
         });
@@ -214,11 +230,19 @@ fn copied_feedback(button: &HtmlElement) {
     let Ok(Some(label)) = button.query_selector("[data-copy-label]") else {
         return;
     };
-    label.set_text_content(Some("Lien copié ✓"));
+    label.set_text_content(Some(lang().t(
+        "Lien copié ✓",
+        "Link copied ✓",
+        "Enlace copiado ✓",
+    )));
     let _ = button.class_list().add_1("is-done");
     let button = button.clone();
     let reset = Closure::once_into_js(move || {
-        label.set_text_content(Some("Copier le lien"));
+        label.set_text_content(Some(lang().t(
+            "Copier le lien",
+            "Copy the link",
+            "Copiar el enlace",
+        )));
         let _ = button.class_list().remove_1("is-done");
     });
     let _ =

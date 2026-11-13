@@ -1,0 +1,761 @@
+{
+  "sourceLanguage" : "fr",
+  "strings" : {
+    "%@ du frigo" : {
+      "comment" : "Pourcentage (déjà formaté) des ingrédients de la recette déjà dans le frigo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ from your fridge"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ de tu nevera"
+          }
+        }
+      }
+    },
+    "%lld ingrédients au frais" : {
+      "comment" : "Nombre d'ingrédients dans le frigo",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ingredient in the fridge"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ingredients in the fridge"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ingrediente en la nevera"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ingredientes en la nevera"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ingrédient au frais"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld ingrédients au frais"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Ajouter" : {
+      "comment" : "Bouton : ajoute l'ingrédient tapé",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir"
+          }
+        }
+      }
+    },
+    "Ajouter %@" : {
+      "comment" : "VoiceOver : ajoute la suggestion %@",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir %@"
+          }
+        }
+      }
+    },
+    "Ajouter un ingrédient…" : {
+      "comment" : "Champ de saisie",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add an ingredient…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añade un ingrediente…"
+          }
+        }
+      }
+    },
+    "Aucune recette" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No Recipes"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay recetas"
+          }
+        }
+      }
+    },
+    "Essayez sans le mode strict, ou ajoutez un ingrédient." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try without strict mode, or add an ingredient."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prueba sin el modo estricto o añade un ingrediente."
+          }
+        }
+      }
+    },
+    "Frigo" : {
+      "comment" : "Jauge : part de la recette déjà dans le frigo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fridge"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nevera"
+          }
+        }
+      }
+    },
+    "Il vous faut" : {
+      "comment" : "Titre de la liste des ingrédients",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You’ll Need"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Necesitas"
+          }
+        }
+      }
+    },
+    "Je fouille…" : {
+      "comment" : "Bouton pendant la recherche",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Searching…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscando…"
+          }
+        }
+      }
+    },
+    "Le frigo est vide : ajoutez au moins un ingrédient." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The fridge is empty: add at least one ingredient."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La nevera está vacía: añade al menos un ingrediente."
+          }
+        }
+      }
+    },
+    "Le frigo est vide ?" : {
+      "comment" : "Slogan, première moitié",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Empty fridge?"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Nevera vacía?"
+          }
+        }
+      }
+    },
+    "Le frigo est vide…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The fridge is empty…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La nevera está vacía…"
+          }
+        }
+      }
+    },
+    "Les recettes apparaîtront ici, de la meilleure à la moins bonne." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recipes will show up here, best match first."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las recetas aparecerán aquí, de la mejor a la peor."
+          }
+        }
+      }
+    },
+    "Manque %lld" : {
+      "comment" : "Nombre d'ingrédients à acheter",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld missing"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld missing"
+                }
+              }
+            }
+          }
+        },
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Falta %lld"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Faltan %lld"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "Meilleur choix" : {
+      "comment" : "Badge sur la première recette",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Best Pick"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La mejor opción"
+          }
+        }
+      }
+    },
+    "Mon frigo" : {
+      "comment" : "Titre de l'écran principal",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "My Fridge"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mi nevera"
+          }
+        }
+      }
+    },
+    "Pas l'assiette." : {
+      "comment" : "Slogan, seconde moitié (« Le frigo est vide ? Pas l'assiette. »)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not your plate."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu plato, no."
+          }
+        }
+      }
+    },
+    "Retirer %@" : {
+      "comment" : "VoiceOver : retire l'ingrédient %@ du frigo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar %@"
+          }
+        }
+      }
+    },
+    "Rien à acheter" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nothing to buy"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nada que comprar"
+          }
+        }
+      }
+    },
+    "Sans courses (strict)" : {
+      "comment" : "Option : seulement les recettes sans rien à acheter",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No shopping (strict)"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin ir a la compra (estricto)"
+          }
+        }
+      }
+    },
+    "Sel, huile, eau au placard" : {
+      "comment" : "Option : le sel, l'huile et l'eau ne manquent jamais",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Salt, oil and water on hand"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sal, aceite y agua en casa"
+          }
+        }
+      }
+    },
+    "TheMealDB a répondu %lld." : {
+      "comment" : "Erreur HTTP de TheMealDB (%lld : le code)",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TheMealDB returned error %lld."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TheMealDB devolvió el error %lld."
+          }
+        }
+      }
+    },
+    "TheMealDB fouille son garde-manger…" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TheMealDB is raiding its pantry…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TheMealDB rebusca en su despensa…"
+          }
+        }
+      }
+    },
+    "Trouver une recette" : {
+      "comment" : "Bouton principal",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Find a Recipe"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar recetas"
+          }
+        }
+      }
+    },
+    "Vider" : {
+      "comment" : "Bouton : retire tous les ingrédients du frigo",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vaciar"
+          }
+        }
+      }
+    },
+    "Voir la vidéo" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Watch Video"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver el vídeo"
+          }
+        }
+      }
+    },
+    "ail" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "garlic"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ajo"
+          }
+        }
+      }
+    },
+    "carotte" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "carrot"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "zanahoria"
+          }
+        }
+      }
+    },
+    "citron" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "lemon"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "limón"
+          }
+        }
+      }
+    },
+    "fromage" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cheese"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "queso"
+          }
+        }
+      }
+    },
+    "lait" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "milk"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "leche"
+          }
+        }
+      }
+    },
+    "oignon" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "onion"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cebolla"
+          }
+        }
+      }
+    },
+    "pomme de terre" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "potato"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "patata"
+          }
+        }
+      }
+    },
+    "poulet" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "chicken"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pollo"
+          }
+        }
+      }
+    },
+    "pâtes" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pasta"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pasta"
+          }
+        }
+      }
+    },
+    "riz" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "rice"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "arroz"
+          }
+        }
+      }
+    },
+    "tomate" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tomato"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "tomate"
+          }
+        }
+      }
+    },
+    "Étapes" : {
+      "comment" : "Titre de la liste des étapes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Steps"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pasos"
+          }
+        }
+      }
+    },
+    "œufs" : {
+      "comment" : "Suggestion d'ingrédient, en minuscules",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "eggs"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "huevos"
+          }
+        }
+      }
+    },
+    "≈ %lld min" : {
+      "comment" : "Durée estimée, en minutes",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ %lld min"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "≈ %lld min"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

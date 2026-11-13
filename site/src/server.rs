@@ -9,6 +9,8 @@ use std::path::{Path, PathBuf};
 
 use paquets::prelude::*;
 
+use crate::i18n::Lang;
+
 /// Le dossier `site/` : celui qui contient `public/` (le dossier courant, sinon celui de
 /// la crate).
 pub fn site_dir() -> PathBuf {
@@ -34,15 +36,18 @@ pub fn app() -> App {
     let css = std::fs::read(site_dir().join("public/site.css")).unwrap_or_default();
     let css_version = version(&css);
     let mut app = App::new();
-    let v = css_version.clone();
-    app.get("/", move |req: Request| {
-        let site = home::Site::new(&v, share::public_url(&req));
-        async move {
-            home::page(&site)
-                .into_response()
-                .header("cache-control", "no-cache")
-        }
-    });
+    // La page d'accueil en français à la racine, en anglais sous /en/, en espagnol sous /es/.
+    for lang in Lang::ALL {
+        let v = css_version.clone();
+        app.get(lang.home(), move |req: Request| {
+            let site = home::Site::new(&v, share::public_url(&req), lang);
+            async move {
+                home::page(&site)
+                    .into_response()
+                    .header("cache-control", "no-cache")
+            }
+        });
+    }
     app.get("/robots.txt", |_req: Request| async {
         Response::new()
             .header("content-type", "text/plain; charset=utf-8")
@@ -67,7 +72,8 @@ pub fn app() -> App {
     );
     let v = css_version;
     app.fallback(move |req: Request| {
-        let site = home::Site::new(&v, share::public_url(&req));
+        let lang = Lang::from_path(req.path());
+        let site = home::Site::new(&v, share::public_url(&req), lang);
         async move { home::not_found(&site).into_response().status(404) }
     });
     app

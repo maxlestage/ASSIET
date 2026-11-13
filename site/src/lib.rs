@@ -4,6 +4,7 @@
 //! (rendus en HTML par le serveur, rendus interactifs par le bundle WebAssembly). Le serveur (`server`) n'existe qu'en natif, le mouvement de la page
 //! (`client`) que dans le navigateur.
 
+pub mod i18n;
 pub mod islands;
 
 #[cfg(not(target_arch = "wasm32"))]

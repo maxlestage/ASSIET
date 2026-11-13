@@ -84,7 +84,9 @@ frigo dessiné qui s'ouvre quand on le touche (un îlot Rust compilé en WebAsse
 bandeaux qui défilent, les trois écrans de l'app dessinés à plat, les fonctionnalités, des
 chiffres, le placard, une semaine de repas, l'anti-gaspi, les cuisines du monde, la
 confidentialité, l'architecture, les questions fréquentes, l'annonce de l'App Store, une
-carte de partage et un pied de page complet. Conçu pour le mobile d'abord, sans aucun
+carte de partage et un pied de page complet. En trois langues : le français à la racine,
+l'anglais sous `/en/` et l'espagnol sous `/es/` (`site/src/i18n.rs`, un sélecteur FR · EN · ES,
+des liens `hreflang` et une image de partage par langue). Conçu pour le mobile d'abord, sans aucun
 défilement horizontal (vérifié à 320, 390 et 1440 px).
 
 ```sh
@@ -142,7 +144,7 @@ git push heroku master
 Autre voie : la pile container (`heroku stack:set container`), qui construit le
 `Dockerfile` décrit par `heroku.yml`.
 
-Routes : `/` (la page), `/manifest.webmanifest` et `/sw.js` (la page s'ouvre aussi hors
+Routes : `/`, `/en/` et `/es/` (la page dans chaque langue), `/manifest.webmanifest` et `/sw.js` (la page s'ouvre aussi hors
 ligne), `/assets/…` (icônes et image de partage).
 
 ## L'app iPhone
@@ -151,6 +153,10 @@ ligne), `/assets/…` (icônes et image de partage).
 sur macOS et Linux), et l'app SwiftUI : le frigo gardé avec SwiftData, la recherche en
 parallèle avec un `TaskGroup` dans un `actor`, des cartes qui arrivent en 3D, Liquid Glass,
 retours haptiques.
+
+L'app parle français, anglais et espagnol (un String Catalog,
+`App/FrigoVide/Localizable.xcstrings`) ; FrigoKit comprend les ingrédients tapés dans ces
+trois langues (« poulet », « chicken » ou « pollo » donnent tous `chicken` pour TheMealDB).
 
 ```sh
 cd ios
