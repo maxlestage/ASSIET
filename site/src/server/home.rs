@@ -14,7 +14,7 @@ const LICENSE: &str = "https://github.com/maxlestage/ASSIET/blob/master/LICENSE"
 const PAQUETS: &str = "https://github.com/maxlestage/Paquets";
 const MEALDB: &str = "https://www.themealdb.com/";
 const TITLE: &str = "Frigo vide — la recette la plus rapide avec ce qu'il reste dans le frigo";
-const DESCRIPTION: &str = "Frigo vide lit vos ingrédients, interroge TheMealDB et trouve la meilleure recette à préparer. En Rust (CLI et TUI) et sur iPhone (SwiftUI).";
+const DESCRIPTION: &str = "Frigo vide lit vos ingrédients, interroge TheMealDB et trouve la meilleure recette à préparer. Installable sur téléphone, gratuit, et en app iPhone (SwiftUI).";
 
 /// Ce que chaque page doit savoir : la version de la feuille de style et l'adresse
 /// publique du site (pour les liens de partage, le QR code et les aperçus).
@@ -83,8 +83,6 @@ pub fn page(site: &Site) -> Page {
             .child(marquee())
             .child(steps())
             .child(demo())
-            .child(terminal())
-            .child(tui())
             .child(ios())
             .child(tech_band())
             .child(architecture())
@@ -139,7 +137,6 @@ fn navbar() -> Element {
                 .class("nav__links")
                 .attr("aria-label", "Sections")
                 .child(a().href("#demo").text("Démo"))
-                .child(a().href("#terminal").text("CLI"))
                 .child(a().href("#ios").text("iPhone"))
                 .child(a().href("#installer").text("Installer"))
                 .child(a().href("#partager").text("Partager")),
@@ -194,13 +191,13 @@ fn hero() -> Element {
                     div()
                         .class("ctas")
                         .child(a().class("btn btn--tomato btn--big").href("#demo").text("Essayer maintenant →"))
-                        .child(a().class("btn btn--white btn--big").href("#installer").text("cargo install")),
+                        .child(a().class("btn btn--white btn--big").href("#installer").text("Installer l'app")),
                 )
                 .child(
                     ul().class("stats")
                         .child(li().class("stat stat--sun").child(strong().text("0")).text(" clé d'API"))
-                        .child(li().class("stat stat--mint").child(strong().text("100\u{a0}%")).text(" Rust au terminal"))
-                        .child(li().class("stat stat--sky").child(strong().text("1")).text(" cœur partagé")),
+                        .child(li().class("stat stat--mint").child(strong().text("0")).text(" compte à créer"))
+                        .child(li().class("stat stat--sky").child(strong().text("100\u{a0}%")).text(" gratuit")),
                 ),
         )
         .child(div().class("hero__art").child(island("frigo-dessin", "", frigo_dessin)))
@@ -258,7 +255,6 @@ fn tech_band() -> Element {
             "⚡ tokio",
             "📦 Paquets",
             "🕸️ WebAssembly",
-            "🖥️ ratatui",
             "🍎 SwiftUI",
             "💾 SwiftData",
             "🔎 TheMealDB",
@@ -350,7 +346,7 @@ fn steps() -> Element {
         .child(head(
             "Comment ça marche",
             "Quatre étapes, zéro courses",
-            Some("Le même cœur Rust, frigo-core, sert la CLI, la TUI et l'API de ce site."),
+            Some("Le même cœur Rust, frigo-core, fait tourner la démo de ce site ; l'app iPhone reprend le même algorithme."),
         ))
         .child(
             ol().class("steps-grid")
@@ -386,160 +382,6 @@ fn demo() -> Element {
             Some("Touchez une suggestion ou tapez un ingrédient, puis lancez la recherche. Les recettes viennent vraiment de TheMealDB."),
         ))
         .child(div().class("demo-wrap").attr("data-reveal", "").child(island("frigo", "poulet,riz,oignon", frigo)))
-}
-
-fn window_bar(title: &str) -> Element {
-    div()
-        .class("window__bar")
-        .child(span().class("dot dot--r"))
-        .child(span().class("dot dot--y"))
-        .child(span().class("dot dot--g"))
-        .child(span().class("window__title").text(title.to_owned()))
-}
-
-fn terminal() -> Element {
-    // La vraie sortie de `frigo poulet riz oignon ail` (étapes et dernières lignes coupées).
-    let lines: [(&str, &str); 16] = [
-        ("cmd", "frigo poulet riz oignon ail"),
-        ("dim", "🧊 Frigo\u{a0}: poulet, riz, oignon, ail"),
-        ("", ""),
-        ("title", "🍽  Chicken Congee"),
-        (
-            "dim",
-            "   ≈ 94 min · Chicken · Chinese · 67\u{a0}% des ingrédients",
-        ),
-        ("ok", "   ✓ Chicken (8 oz)"),
-        ("ok", "   ✓ Rice (1/2 cup)"),
-        ("ok", "   ✓ Spring Onions (1 tbs)"),
-        ("ok", "   ✓ Salt · Pepper · Water"),
-        ("miss", "   ✗ Ginger (1 tsp)"),
-        ("miss", "   ✗ Coriander (2 oz)"),
-        (
-            "miss",
-            "   À acheter\u{a0}: Ginger Cordial, Ginger, Coriander",
-        ),
-        ("", ""),
-        ("title", "Aussi possible\u{a0}:"),
-        (
-            "dim",
-            "   • Poulet Roti a l'Algerienne ≈ 105 min · manque 3",
-        ),
-        (
-            "dim",
-            "   • Presh me Oriz Leek and Rice Bake ≈ 90 min · manque 3",
-        ),
-    ];
-    section()
-        .class("section split")
-        .id("terminal")
-        .child(
-            div()
-                .child(head(
-                    "En ligne de commande",
-                    "Un binaire, aucun JavaScript",
-                    Some("frigo est un seul binaire, compilé par cargo\u{a0}: tokio pour l'asynchrone, reqwest pour HTTP, serde pour le JSON, clap pour les options."),
-                ))
-                .child(
-                    ul().class("flags")
-                        .child(li().child(code().text("--strict")).text(" rien à acheter"))
-                        .child(li().child(code().text("-t 30")).text(" 30 minutes au plus"))
-                        .child(li().child(code().text("-f frigo.txt")).text(" la liste d'un fichier"))
-                        .child(li().child(code().text("--json")).text(" pour vos scripts")),
-                ),
-        )
-        .child(
-            div()
-                .class("window window--term")
-                .attr("data-reveal", "")
-                .child(window_bar("~/cuisine — frigo"))
-                .child(div().class("term").attr("role", "img").attr("aria-label", "Exemple de sortie de la commande frigo").children(
-                    lines.iter().enumerate().map(|(i, (kind, text))| {
-                        let kind = if kind.is_empty() { "blank" } else { kind };
-                        let line = div().class(format!("term__line term__line--{kind}")).style(format!("--i:{i}"));
-                        if kind == "cmd" {
-                            line.child(span().class("term__prompt").text("$ "))
-                                .child(span().class("term__typed").style(format!("--n:{}", text.chars().count())).text(*text))
-                        } else {
-                            line.text(*text)
-                        }
-                    }),
-                )),
-        )
-}
-
-fn tui() -> Element {
-    let recipes = [
-        ("-3", "Zemiakové Placky", "84 min"),
-        ("-3", "Salt cod tortilla", "93 min"),
-        ("-3", "Yemeni Lahsa", "25 min"),
-        ("-4", "Spiced tortilla", "30 min"),
-    ];
-    section()
-        .class("section split split--reverse")
-        .id("tui")
-        .child(
-            div()
-                .child(head(
-                    "Interface plein écran",
-                    "La TUI, au clavier",
-                    Some("frigo --tui ouvre une interface façon curses (ratatui et crossterm)\u{a0}: le frigo en haut, les recettes à gauche, la recette à droite."),
-                ))
-                .child(
-                    ul().class("keys")
-                        .child(li().child(kbd().text("↑ ↓")).text(" choisir"))
-                        .child(li().child(kbd().text("Tab")).text(" changer de zone"))
-                        .child(li().child(kbd().text("s")).text(" strict"))
-                        .child(li().child(kbd().text("p")).text(" placard"))
-                        .child(li().child(kbd().text("q")).text(" quitter")),
-                ),
-        )
-        .child(
-            div()
-                .class("window window--tui")
-                .attr("data-reveal", "")
-                .attr("role", "img")
-                .attr("aria-label", "Aperçu de l'interface plein écran de frigo")
-                .child(window_bar("frigo --tui"))
-                .child(
-                    div()
-                        .class("tui")
-                        .child(
-                            div()
-                                .class("tui__box tui__box--active")
-                                .child(span().class("tui__label").text("🧊 Mon frigo"))
-                                .child(span().text("œufs, pomme de terre, oignon"))
-                                .child(span().class("tui__caret")),
-                        )
-                        .child(
-                            div()
-                                .class("tui__body")
-                                .child(div().class("tui__box").child(span().class("tui__label").text("🍽 Recettes (4)")).children(
-                                    recipes.iter().enumerate().map(|(i, (badge, name, time))| {
-                                        div().class(if i == 0 { "tui__row is-selected" } else { "tui__row" })
-                                            .child(span().class("tui__badge").text(*badge))
-                                            .child(span().class("tui__name").text(*name))
-                                            .child(span().class("tui__time").text(*time))
-                                    }),
-                                ))
-                                .child(
-                                    div()
-                                        .class("tui__box")
-                                        .child(span().class("tui__label").text("Zemiakové Placky"))
-                                        .child(div().class("tui__gauge").style("--p:67%").child(span()).child(em().text("67\u{a0}% · ≈ 84 min")))
-                                        .child(p().class("ok").text("✓ Potatoes  ✓ Onion  ✓ Egg"))
-                                        .child(p().class("ok").text("✓ Salt  ✓ Black Pepper  ✓ Oil"))
-                                        .child(p().class("miss").text("✗ Garlic  ✗ All purpose flour"))
-                                        .child(p().class("miss").text("✗ Marjoram")),
-                                ),
-                        )
-                        .child(
-                            div()
-                                .class("tui__help")
-                                .child(span().class("tui__flags").text(" strict:non placard:oui "))
-                                .child(span().text(" ↑↓ choisir · Tab zone · q quitter")),
-                        ),
-                ),
-        )
 }
 
 fn ios() -> Element {
@@ -597,7 +439,7 @@ fn architecture() -> Element {
         (
             "📝",
             "Entrée",
-            "Arguments, fichier, entrée standard, TUI, formulaire du site ou app iOS",
+            "Le formulaire du site ou l'app iPhone",
             "sun",
         ),
         (
@@ -621,14 +463,14 @@ fn architecture() -> Element {
         (
             "🖥️",
             "Affichage",
-            "Console, ratatui, JSON, cartes WebAssembly ou SwiftUI",
+            "Des cartes WebAssembly sur le site, SwiftUI sur iPhone",
             "grape",
         ),
     ];
     section()
         .class("section")
         .id("architecture")
-        .child(head("Architecture", "Un cœur, trois visages", None))
+        .child(head("Architecture", "Un cœur, deux visages", None))
         .child(
             ol().class("flow").children(blocks.iter().enumerate().map(
                 |(i, (icon, title, text, tone))| {
@@ -649,19 +491,21 @@ fn architecture() -> Element {
 }
 
 fn install() -> Element {
-    let commands = [
+    let platforms = [
         (
-            "La CLI et la TUI",
-            "cargo install --git https://github.com/maxlestage/ASSIET frigo --locked",
-            "sun",
+            "📱 Android",
+            "Touchez «\u{a0}Installer l'app\u{a0}» ci-dessous, ou le menu ⋮ de Chrome puis «\u{a0}Installer l'application\u{a0}».",
+            "mint",
         ),
-        ("Une recette", "frigo poulet riz \"pomme de terre\"", "mint"),
-        ("Sans courses", "frigo -f frigo.txt --strict -t 30", "sky"),
-        ("Le site", "cd site && cargo run --release", "peach"),
         (
-            "L'app iOS",
-            "cd ios && xcodegen && open FrigoVide.xcodeproj",
-            "grape",
+            "🍎 iPhone et iPad",
+            "Dans Safari, touchez Partager, puis «\u{a0}Sur l'écran d'accueil\u{a0}». Frigo vide s'ouvre ensuite comme une app.",
+            "sky",
+        ),
+        (
+            "💻 Ordinateur",
+            "Dans Chrome ou Edge, cliquez sur l'icône d'installation au bout de la barre d'adresse.",
+            "peach",
         ),
     ];
     section()
@@ -669,35 +513,36 @@ fn install() -> Element {
         .id("installer")
         .child(head(
             "Installer",
-            "À table en une commande",
-            Some("Rust 1.95 ou plus récent. Aucune clé d'API\u{a0}: TheMealDB est gratuit."),
+            "À table en un geste",
+            Some("Frigo vide s'installe sur l'écran d'accueil, sans passer par un store\u{a0}: gratuit, sans compte, et la page s'ouvre même sans réseau."),
         ))
         .child(
             div()
-                .class("commands")
-                .children(commands.iter().enumerate().map(|(i, (label, cmd, tone))| {
+                .class("platforms")
+                .children(platforms.iter().enumerate().map(|(i, (label, text, tone))| {
                     figure()
-                        .class(format!("command command--{tone}"))
+                        .class(format!("platform platform--{tone}"))
                         .attr("data-reveal", "")
                         .style(format!("--d:{}ms", i * 80))
                         .child(figcaption().text(*label))
-                        .child(pre().child(code().text(*cmd)))
+                        .child(p().text(*text))
                 })),
         )
         .child(
             div()
                 .class("ctas ctas--center")
                 .attr("data-reveal", "")
+                .child(install_buttons("install--center"))
                 .child(
                     a().class("btn btn--tomato btn--big")
-                        .href(REPO)
-                        .attr("rel", "noopener")
-                        .text("Le code sur GitHub"),
+                        .href("#demo")
+                        .text("Essayer la démo"),
                 )
                 .child(
                     a().class("btn btn--white btn--big")
-                        .href("#demo")
-                        .text("Rejouer la démo"),
+                        .href(REPO)
+                        .attr("rel", "noopener")
+                        .text("Le code sur GitHub"),
                 ),
         )
 }
@@ -943,10 +788,9 @@ fn site_footer(url: &str) -> Element {
                     "Le produit",
                     &[
                         ("Démo en direct", "/#demo", false),
-                        ("Ligne de commande", "/#terminal", false),
-                        ("Interface plein écran", "/#tui", false),
+                        ("Comment ça marche", "/#comment", false),
                         ("App iPhone", "/#ios", false),
-                        ("Installer", "/#installer", false),
+                        ("Installer l'app", "/#installer", false),
                     ],
                 ))
                 .child(footer_column(

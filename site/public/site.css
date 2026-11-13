@@ -1312,252 +1312,6 @@ pre {
   margin-top: 4px;
 }
 
-/* ───────── Fenêtres : terminal et TUI ───────── */
-
-.window {
-  min-width: 0;
-  overflow: hidden;
-  border: var(--border);
-  border-radius: 18px;
-  background: var(--ink);
-  box-shadow: 8px 8px 0 var(--tomato);
-}
-
-.window--tui {
-  box-shadow: 8px 8px 0 var(--mint);
-}
-
-.window__bar {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 10px 14px;
-  border-bottom: var(--border);
-  background: var(--sun);
-}
-
-.dot {
-  width: 13px;
-  height: 13px;
-  border: 2px solid var(--ink);
-  border-radius: 50%;
-}
-
-.dot--r { background: var(--tomato); }
-.dot--y { background: var(--paper); }
-.dot--g { background: var(--mint); }
-
-.window__title {
-  margin-left: 6px;
-  overflow: hidden;
-  font: 800 0.8rem var(--mono);
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.term {
-  padding: 16px;
-  color: #e9e6ff;
-  font: 0.78rem/1.65 var(--mono);
-}
-
-.term__line {
-  min-height: 1.65em;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.term__line--dim { color: #b7b2d6; }
-.term__line--title { color: var(--sun); font-weight: 800; }
-.term__line--ok { color: #6ff0c8; }
-.term__line--miss { color: #ff8f92; }
-
-.term__prompt {
-  color: var(--peach);
-}
-
-.term__typed {
-  display: inline-block;
-  max-width: 100%;
-  vertical-align: bottom;
-  border-right: 2px solid var(--sun);
-}
-
-.window.in .term__typed {
-  overflow: hidden;
-  white-space: nowrap;
-  animation: type 1.5s steps(var(--n)) both, caret 0.8s step-end infinite;
-}
-
-.window.in .term__line:not(.term__line--cmd) {
-  animation: rise 0.35s var(--ease) both;
-  animation-delay: calc(1.6s + var(--i) * 80ms);
-}
-
-@keyframes type {
-  from {
-    width: 0;
-  }
-  to {
-    width: calc(var(--n) * 1ch);
-  }
-}
-
-@keyframes caret {
-  50% {
-    border-color: transparent;
-  }
-}
-
-.tui {
-  display: grid;
-  gap: 8px;
-  padding: 12px 10px;
-  color: #e9e6ff;
-  font: 0.72rem/1.5 var(--mono);
-}
-
-.tui__box {
-  position: relative;
-  min-width: 0;
-  padding: 12px 10px 8px;
-  border: 2px solid #7d78a8;
-  border-radius: 6px;
-}
-
-.tui__box--active {
-  border: 2px solid var(--peach);
-}
-
-.tui__label {
-  position: absolute;
-  top: -0.8em;
-  left: 8px;
-  padding: 0 4px;
-  background: var(--ink);
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.tui__caret {
-  display: inline-block;
-  width: 0.6em;
-  height: 1.1em;
-  margin-left: 2px;
-  vertical-align: text-bottom;
-  background: #fff;
-  animation: caret 1s step-end infinite;
-}
-
-.tui__body {
-  display: grid;
-  gap: 10px;
-}
-
-.tui__row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-}
-
-.tui__row.is-selected {
-  color: var(--peach);
-  font-weight: 800;
-}
-
-.tui__row.is-selected::before {
-  content: "▶";
-}
-
-.tui__badge {
-  padding: 0 4px;
-  background: var(--peach);
-  color: var(--ink);
-}
-
-.tui__name {
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.tui__time {
-  color: #b7b2d6;
-}
-
-.tui__gauge {
-  position: relative;
-  display: grid;
-  place-items: center;
-  height: 1.6em;
-  margin-bottom: 6px;
-  background: #3a3460;
-}
-
-.tui__gauge span {
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: var(--p, 100%);
-  background: var(--mint);
-  transform-origin: 0 50%;
-}
-
-.window.in .tui__gauge span {
-  animation: grow 1.4s var(--ease) 0.3s both;
-}
-
-.tui__gauge em {
-  position: relative;
-  color: var(--ink);
-  font-style: normal;
-  font-weight: 800;
-}
-
-.tui .ok { color: #6ff0c8; }
-.tui .miss { color: #ff8f92; }
-
-.tui__help {
-  display: flex;
-  flex-wrap: wrap;
-  color: #b7b2d6;
-}
-
-.tui__flags {
-  background: var(--mint);
-  color: var(--ink);
-}
-
-.flags,
-.keys,
-.features {
-  display: grid;
-  gap: 10px;
-  margin: 22px 0 0;
-  padding: 0;
-  list-style: none;
-  font-weight: 600;
-}
-
-.flags code,
-kbd {
-  padding: 2px 8px;
-  border: 2px solid var(--ink);
-  border-radius: 8px;
-  background: var(--paper);
-  font-size: 0.85em;
-  box-shadow: 2px 2px 0 var(--ink);
-}
-
-.features li {
-  padding: 10px 14px;
-  border: 2px solid var(--ink);
-  border-radius: 14px;
-  background: var(--paper);
-}
-
 /* ───────── L'iPhone, à plat ───────── */
 
 .phone-stage {
@@ -1785,15 +1539,15 @@ kbd {
 
 /* ───────── Installer ───────── */
 
-.commands {
+.platforms {
   display: grid;
   gap: 14px;
-  max-width: 760px;
+  max-width: 980px;
   margin: 30px auto 0;
   text-align: left;
 }
 
-.command {
+.platform {
   min-width: 0;
   margin: 0;
   overflow: hidden;
@@ -1803,31 +1557,23 @@ kbd {
   box-shadow: var(--shadow-s);
 }
 
-.command figcaption {
-  padding: 7px 14px;
+.platform figcaption {
+  padding: 8px 14px;
   border-bottom: var(--border);
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-
-.command--sun figcaption { background: var(--sun); }
-.command--mint figcaption { background: var(--mint-l); }
-.command--sky figcaption { background: var(--sky-l); }
-.command--peach figcaption { background: var(--peach-l); }
-.command--grape figcaption { background: var(--grape-l); }
-
-.command pre {
-  margin: 0;
-  padding: 12px 14px;
-  font-size: 0.86rem;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-}
-
-.command code::before {
-  content: "$ ";
-  color: var(--tomato);
   font-weight: 900;
+}
+
+.platform--mint figcaption { background: var(--mint-l); }
+.platform--sky figcaption { background: var(--sky-l); }
+.platform--peach figcaption { background: var(--peach-l); }
+
+.platform p {
+  padding: 12px 14px 14px;
+  color: var(--ink-2);
+}
+
+.install--center {
+  justify-content: center;
 }
 
 /* ───────── Partager ───────── */
@@ -2344,18 +2090,6 @@ kbd {
     grid-column: 1 / -1;
   }
 
-  .term {
-    font-size: 0.85rem;
-  }
-
-  .tui {
-    font-size: 0.8rem;
-  }
-
-  .tui__body {
-    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  }
-
 }
 
 @media (min-width: 560px) {
@@ -2441,6 +2175,10 @@ kbd {
 
   .flow {
     grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .platforms {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .flow__item {
