@@ -1,9 +1,9 @@
-//! Le bundle du navigateur : rend les îlots interactifs et anime la page (apparitions au
-//! défilement, barre de progression, barre de navigation), et fait marcher le partage
-//! (partage du téléphone, copie du lien) et l'installation de l'app. Sans lui, la page
-//! reste lisible et complète, et les liens de partage marchent.
+//! Le bundle du navigateur : rend le frigo dessiné interactif et anime la page (apparitions
+//! au défilement, barre de progression, barre de navigation), et fait marcher le partage
+//! (partage du téléphone, copie du lien). Sans lui, la page reste lisible et complète, et
+//! les liens de partage marchent.
 
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::rc::Rc;
 
 use wasm_bindgen::JsCast;
@@ -12,8 +12,6 @@ use wasm_bindgen_futures::JsFuture;
 use web_sys::{
     HtmlElement, IntersectionObserver, IntersectionObserverEntry, IntersectionObserverInit,
 };
-
-use crate::islands::Answer;
 
 #[wasm_bindgen(start)]
 pub fn start() {
@@ -24,7 +22,6 @@ pub fn start() {
     let _ = root.class_list().add_1("hydrated");
     scroll_state(&root);
     sharing();
-    installing(&root);
 }
 
 fn window() -> web_sys::Window {
@@ -226,203 +223,4 @@ fn copied_feedback(button: &HtmlElement) {
     });
     let _ =
         window().set_timeout_with_callback_and_timeout_and_arguments_0(reset.unchecked_ref(), 2000);
-}
-
-/// Montre ou cache les boutons « Installer l'app ».
-fn show_install(visible: bool) {
-    for button in all("[data-install]") {
-        button.set_hidden(!visible);
-    }
-}
-
-/// L'installation de l'app : le bouton « Installer l'app » apparaît quand le navigateur
-/// la propose (`beforeinstallprompt`), l'astuce pour Safari sur iPhone et iPad, et rien
-/// quand l'app est déjà installée (ouverte en plein écran).
-fn installing(root: &HtmlElement) {
-    let win = window();
-    let nav = win.navigator();
-    let navigator: JsValue = nav.clone().into();
-    let standalone = win
-        .match_media("(display-mode: standalone)")
-        .ok()
-        .flatten()
-        .is_some_and(|m| m.matches())
-        || get(&navigator, "standalone").as_bool() == Some(true);
-    if standalone {
-        let _ = root.class_list().add_1("standalone");
-        return;
-    }
-    let agent = nav.user_agent().unwrap_or_default();
-    let touch_mac = agent.contains("Macintosh") && nav.max_touch_points() > 1;
-    let ios = ["iPhone", "iPad", "iPod"].iter().any(|d| agent.contains(d)) || touch_mac;
-    if ios {
-        for hint in all("[data-install-ios]") {
-            hint.set_hidden(false);
-        }
-    }
-
-    let deferred: Rc<RefCell<Option<JsValue>>> = Rc::new(RefCell::new(None));
-    let offered = {
-        let deferred = deferred.clone();
-        Closure::<dyn Fn(web_sys::Event)>::new(move |event: web_sys::Event| {
-            // Le navigateur garde sa proposition : c'est notre bouton qui la montrera.
-            event.prevent_default();
-            deferred.replace(Some(event.into()));
-            show_install(true);
-        })
-    };
-    let _ = win
-        .add_event_listener_with_callback("beforeinstallprompt", offered.as_ref().unchecked_ref());
-    offered.forget();
-    let installed = Closure::<dyn Fn()>::new(|| {
-        show_install(false);
-        for hint in all("[data-install-ios]") {
-            hint.set_hidden(true);
-        }
-    });
-    let _ =
-        win.add_event_listener_with_callback("appinstalled", installed.as_ref().unchecked_ref());
-    installed.forget();
-
-    for button in all("[data-install]") {
-        let deferred = deferred.clone();
-        on_click(&button, move || {
-            let Some(event) = deferred.borrow_mut().take() else {
-                return;
-            };
-            let _ = call(&event, "prompt", &[]);
-            // La proposition ne sert qu'une fois, acceptée ou non.
-            settle(Some(get(&event, "userChoice")), |_| show_install(false));
-        });
-    }
-}
-
-/// `GET /api/recettes?i=…&strict=…`, puis `done(réponse)`.
-pub fn fetch_answer(items: Vec<String>, strict: bool, done: impl FnOnce(Answer) + 'static) {
-    wasm_bindgen_futures::spawn_local(async move {
-        let result = if is_static() {
-            search_mealdb(&items, strict).await
-        } else {
-            let query: String = items
-                .iter()
-                .map(|i| String::from(js_sys::encode_uri_component(i)))
-                .collect::<Vec<_>>()
-                .join(",");
-            load(&format!(
-                "/api/recettes?i={query}&strict={}",
-                u8::from(strict)
-            ))
-            .await
-        };
-        let answer = result.unwrap_or_else(|e| Answer {
-            fridge: items,
-            cards: Vec::new(),
-            error: Some(e),
-        });
-        done(answer);
-    });
-}
-
-/// La page vient du site statique (GitHub Pages) : pas de serveur, pas d'`/api`.
-fn is_static() -> bool {
-    document()
-        .query_selector("[data-mode='static']")
-        .ok()
-        .flatten()
-        .is_some()
-}
-
-const MEALDB: &str = "https://www.themealdb.com/api/json/v1/1";
-
-/// Le texte d'une adresse.
-async fn get_text(url: &str) -> Result<String, String> {
-    let offline = || "Pas de réseau\u{a0}: la démo a besoin de TheMealDB.".to_string();
-    let response: web_sys::Response = JsFuture::from(window().fetch_with_str(url))
-        .await
-        .map_err(|_| offline())?
-        .unchecked_into();
-    if !response.ok() {
-        return Err(format!("TheMealDB a répondu {}.", response.status()));
-    }
-    JsFuture::from(response.text().map_err(|_| offline())?)
-        .await
-        .map_err(|_| offline())
-        .map(|t| t.as_string().unwrap_or_default())
-}
-
-/// La recherche de `frigo-core` (comme `MealDb::suggest`), faite par le navigateur :
-/// TheMealDB autorise les appels de toutes les origines.
-async fn search_mealdb(fridge: &[String], strict: bool) -> Result<Answer, String> {
-    use std::collections::HashMap;
-
-    let unreadable = |_| "Réponse illisible de TheMealDB.".to_string();
-    // 1. Chaque ingrédient, en parallèle.
-    let lists = futures::future::join_all(fridge.iter().map(|item| {
-        let url = format!(
-            "{MEALDB}/filter.php?i={}",
-            String::from(js_sys::encode_uri_component(&frigo_core::api_name(item)))
-        );
-        async move { get_text(&url).await }
-    }))
-    .await;
-    let mut hits: HashMap<String, (usize, usize)> = HashMap::new();
-    let mut order = 0;
-    for list in lists {
-        for summary in frigo_core::parse_summaries(&list?).map_err(unreadable)? {
-            order += 1;
-            hits.entry(summary.id).or_insert((0, order)).0 += 1;
-        }
-    }
-    let mut ids: Vec<(String, (usize, usize))> = hits.into_iter().collect();
-    ids.sort_by(|(_, (a, oa)), (_, (b, ob))| b.cmp(a).then(oa.cmp(ob)));
-    ids.truncate(24);
-
-    // 2. Le détail des meilleures, en parallèle.
-    let details = futures::future::join_all(
-        ids.iter()
-            .map(|(id, _)| format!("{MEALDB}/lookup.php?i={id}"))
-            .map(|url| async move { get_text(&url).await }),
-    )
-    .await;
-    let mut meals = Vec::new();
-    for detail in details {
-        meals.extend(frigo_core::parse_meals(&detail?).map_err(unreadable)?);
-    }
-
-    // 3. Le classement, avec le même cœur que la CLI.
-    let criteria = frigo_core::Criteria {
-        strict,
-        ..frigo_core::Criteria::default()
-    };
-    let cards = frigo_core::rank(&meals, fridge, &criteria)
-        .iter()
-        .take(crate::recipes::CARDS)
-        .map(|m| {
-            let thumb = m.meal.thumbnail.as_ref().map(|t| format!("{t}/small"));
-            crate::recipes::card(m, thumb)
-        })
-        .collect();
-    Ok(Answer {
-        fridge: fridge.to_vec(),
-        cards,
-        error: None,
-    })
-}
-
-async fn load(url: &str) -> Result<Answer, String> {
-    let offline = || "Pas de réseau : la démo a besoin de TheMealDB.".to_string();
-    let response: web_sys::Response = JsFuture::from(window().fetch_with_str(url))
-        .await
-        .map_err(|_| offline())?
-        .unchecked_into();
-    let text = JsFuture::from(response.text().map_err(|_| offline())?)
-        .await
-        .map_err(|_| offline())?
-        .as_string()
-        .unwrap_or_default();
-    if !response.ok() && text.is_empty() {
-        return Err(format!("Le serveur a répondu {}.", response.status()));
-    }
-    paquets::serde_json::from_str(&text)
-        .map_err(|_| format!("Réponse illisible ({}).", response.status()))
 }
