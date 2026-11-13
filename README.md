@@ -111,6 +111,21 @@ cd site
 BASE_PATH=/ASSIET cargo run --release -- export dist   # pour essayer en local
 ```
 
+### Sur Heroku
+
+Le dépôt se déploie tel quel avec le buildpack **emk/rust** (`app.json`) :
+`RustConfig` saute la compilation de la racine (la CLI) et lance `heroku-build.sh`, qui
+construit le serveur du site et ses îlots WebAssembly ; le `Procfile` démarre
+`site/target/release/frigo-site` sur `PORT`. Avec la démo en direct (`/api/recettes`).
+
+```sh
+heroku buildpacks:set emk/rust      # une fois, si l'app utilise un autre buildpack
+git push heroku master
+```
+
+Autre voie : la pile container (`heroku stack:set container`), qui construit le
+`Dockerfile` décrit par `heroku.yml`.
+
 Routes : `/` (la page), `/api/recettes?i=poulet,riz&strict=1` (JSON, gardé 15 minutes),
 `/vignette/{fichier}` (les photos de TheMealDB relayées : la page n'accepte que ses propres
 images), `/manifest.webmanifest` (installable).

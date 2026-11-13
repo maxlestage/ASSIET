@@ -1,0 +1,10 @@
+{
+  "name": "Frigo vide",
+  "description": "La recette la plus rapide avec ce qu'il reste dans le frigo : le site de présentation, une application Paquets avec sa démo en direct (TheMealDB).",
+  "repository": "https://github.com/maxlestage/ASSIET",
+  "logo": "https://maxlestage.github.io/ASSIET/assets/logo.svg",
+  "keywords": ["rust", "paquets", "wasm", "recettes", "themealdb"],
+  "stack": "heroku-26",
+  "buildpacks": [{ "url": "emk/rust" }],
+  "success_url": "/"
+}

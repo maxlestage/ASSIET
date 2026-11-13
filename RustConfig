@@ -1,0 +1,9 @@
+# Heroku avec le buildpack emk/rust : le site (site/), pas la CLI de la racine.
+#
+# Le buildpack lit ce fichier, installe Rust, puis lancerait un simple `cargo build
+# --release` à la racine (la CLI frigo). On saute cette étape : heroku-build.sh construit
+# le serveur du site et ses îlots WebAssembly, une fois Rust installé. Le Procfile lance
+# site/target/release/frigo-site.
+VERSION=stable
+RUST_SKIP_BUILD=1
+trap 'status=$?; if [ "$status" -eq 0 ]; then ENV_DIR="$ENV_DIR" bash "$BUILD_DIR/heroku-build.sh" || exit 1; fi' EXIT
