@@ -1,0 +1,5 @@
+# L'autre façon de déployer sur Heroku : la pile « container » (HEROKU_BUILD=docker),
+# qui construit l'image du Dockerfile. Par défaut, c'est le buildpack emk/rust (RustConfig).
+build:
+  docker:
+    web: Dockerfile
