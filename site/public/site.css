@@ -2059,6 +2059,154 @@ pre {
   animation: rise 0.35s var(--ease);
 }
 
+/* Les tarifs : deux cartes, Gratuit et Premium. */
+.pricing {
+  display: grid;
+  gap: 28px;
+  max-width: 900px;
+  margin: 40px auto 0;
+  text-align: left;
+}
+
+.plan {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+  padding: 28px 24px 24px;
+  border: var(--border);
+  border-radius: var(--radius);
+  background: var(--paper);
+  box-shadow: 8px 8px 0 var(--ink);
+}
+
+.plan--premium {
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0 14px, transparent 14px 28px),
+    var(--grape-l);
+}
+
+.plan__badge {
+  position: absolute;
+  top: -16px;
+  right: 18px;
+  padding: 4px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--sun);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transform: rotate(3deg);
+}
+
+.plan__name {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.plan__price {
+  display: grid;
+  gap: 2px;
+}
+
+.plan__price strong {
+  font-size: clamp(2.4rem, 9vw, 3.2rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.plan__price--tbd strong {
+  font-size: clamp(1.35rem, 5vw, 1.6rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.plan__price span {
+  color: var(--ink-2);
+}
+
+.plan__perks {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan__perk {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.plan__check {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  margin-top: 1px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--mint);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 900;
+}
+
+.plan--premium .plan__check {
+  background: var(--grape);
+}
+
+.plan__text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.plan__text span {
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+.plan__soon {
+  flex: none;
+  padding: 1px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  background: var(--sun-l);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.plan__cta {
+  width: 100%;
+  margin-top: auto;
+}
+
+.pricing__note {
+  max-width: 60ch;
+  margin: 28px auto 0;
+  color: var(--ink-2);
+  font-size: 0.92rem;
+}
+
+@media (min-width: 760px) {
+  .pricing {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .plan--premium {
+    transform: rotate(1deg);
+  }
+}
+
 /* L'App Store : la grosse icône et l'appel final. */
 .appstore__inner {
   display: grid;
