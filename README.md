@@ -9,7 +9,7 @@ moins de choses, qui utilise le plus votre frigo, et la plus rapide à préparer
 |---|---|---|
 | Le cœur | `crates/frigo-core` | Rust 2024, tokio, reqwest 0.13, serde |
 | La CLI et la TUI | `crates/frigo` | clap 4.6, ratatui 0.30, crossterm 0.29, color-eyre |
-| Le site de présentation | `site/` | [Paquets](https://github.com/maxlestage/Paquets), îlots WebAssembly, design 2D plat et coloré |
+| La vitrine de l'app | `site/` | [Paquets](https://github.com/maxlestage/Paquets), un îlot WebAssembly, design 2D plat et coloré |
 | L'app iPhone | `ios/` | Swift 6.3 (Xcode 26), SwiftUI (iOS 26), SwiftData, Swift Testing, XcodeGen |
 
 ## La CLI
@@ -63,7 +63,7 @@ liste d'ingrédients ──► normalisation (français → anglais, pluriels, a
         classement : ingrédients manquants ▸ frigo le mieux utilisé ▸ temps estimé
                          │
                          ▼
-        console · TUI · JSON · cartes du site · app iOS
+        console · TUI · JSON · app iOS
 ```
 
 - TheMealDB ne cherche que par **un** ingrédient à la fois : chaque ingrédient du frigo est
@@ -77,14 +77,15 @@ liste d'ingrédients ──► normalisation (français → anglais, pluriels, a
 
 ## Le site
 
-Une application [Paquets](https://github.com/maxlestage/Paquets) : la page est rendue par le
-serveur (lisible sans JavaScript), les parties interactives sont des îlots Rust compilés en
-WebAssembly. Un style plat en 2D, très coloré (bordures épaisses, ombres décalées) : un frigo
-dessiné qui s'ouvre et se remplit quand on le touche, un bandeau d'ingrédients qui défile,
-une démo en direct qui appelle `/api/recettes` (le même `frigo-core`), l'iPhone dessiné à
-plat, l'installation de l'app, une carte de partage et un pied de page complet. Conçu pour le mobile d'abord, sans aucun défilement
-horizontal (vérifié à 320, 375 et 1440 px). Le bundle WebAssembly pèse environ 85 ko
-compressé.
+La vitrine de l'app iPhone, écrite avec [Paquets](https://github.com/maxlestage/Paquets) : la
+page est rendue par le serveur (lisible sans JavaScript), et ne fait rien elle-même — tout se
+passe dans l'app. Un style plat en 2D, très coloré (bordures épaisses, ombres décalées) : un
+frigo dessiné qui s'ouvre quand on le touche (un îlot Rust compilé en WebAssembly), des
+bandeaux qui défilent, les trois écrans de l'app dessinés à plat, les fonctionnalités, des
+chiffres, le placard, une semaine de repas, l'anti-gaspi, les cuisines du monde, la
+confidentialité, l'architecture, les questions fréquentes, l'annonce de l'App Store, une
+carte de partage et un pied de page complet. Conçu pour le mobile d'abord, sans aucun
+défilement horizontal (vérifié à 320, 390 et 1440 px).
 
 ```sh
 cd site
@@ -96,18 +97,17 @@ wasm-bindgen --target web --no-typescript --remove-name-section --remove-produce
 cargo run --release                    # http://localhost:3000 (PORT sinon)
 ```
 
-### L'app installable et le partage
+### Icônes, hors ligne et partage
 
-Le site est une **PWA** : un manifeste (`/manifest.webmanifest`) avec ses propres icônes
+Le site a un manifeste (`/manifest.webmanifest`) avec ses propres icônes
 (`public/assets/icon-*.png`, dont une « maskable » pour Android et `apple-touch-icon.png`
 pour iPhone) et un service worker (`/sw.js`) qui garde la page, le bundle et les icônes pour
-l'ouvrir sans réseau. Le bouton **Installer l'app** apparaît quand le navigateur propose
-l'installation ; sur iPhone, une astuce rappelle « Partager → Sur l'écran d'accueil ».
+l'ouvrir sans réseau.
 
 La section **Partager** (`#partager`) montre une carte à scanner (un QR code dessiné en SVG
 par le serveur), le partage natif du téléphone, la copie du lien et des liens directs
 (WhatsApp, Telegram, X, Facebook, LinkedIn, e-mail, SMS), sans script tiers ni traceur.
-Les aperçus sur les réseaux utilisent `public/assets/og.png` (1200 × 630).
+Les aperçus sur les réseaux utilisent `public/assets/og.png` (2400 × 1260).
 
 L'adresse partagée est `SITE_URL` si elle est définie, sinon celle demandée par le
 visiteur (`Host`, `X-Forwarded-Proto` derrière Heroku). Les images PNG se régénèrent depuis
@@ -118,8 +118,7 @@ leurs SVG avec `node tools/images.mjs` (Playwright).
 Le workflow `.github/workflows/pages.yml` publie le site à chaque push sur `master`, sur
 <https://maxlestage.github.io/ASSIET/>. Il construit le bundle WebAssembly, puis
 `cargo run --release -- export dist` écrit les pages en fichiers statiques (`BASE_PATH`
-préfixe les adresses). Sans serveur, la démo interroge TheMealDB directement depuis le
-navigateur et classe les recettes avec `frigo-core` compilé en WebAssembly.
+préfixe les adresses).
 
 À faire une seule fois dans le dépôt : **Settings → Pages → Source : GitHub Actions**.
 
@@ -133,7 +132,7 @@ BASE_PATH=/ASSIET cargo run --release -- export dist   # pour essayer en local
 Le dépôt se déploie tel quel avec le buildpack **emk/rust** (`app.json`) :
 `RustConfig` saute la compilation de la racine (la CLI) et lance `heroku-build.sh`, qui
 construit le serveur du site et ses îlots WebAssembly ; le `Procfile` démarre
-`site/target/release/frigo-site` sur `PORT`. Avec la démo en direct (`/api/recettes`).
+`site/target/release/frigo-site` sur `PORT`.
 
 ```sh
 heroku buildpacks:set emk/rust      # une fois, si l'app utilise un autre buildpack
@@ -143,9 +142,8 @@ git push heroku master
 Autre voie : la pile container (`heroku stack:set container`), qui construit le
 `Dockerfile` décrit par `heroku.yml`.
 
-Routes : `/` (la page), `/api/recettes?i=poulet,riz&strict=1` (JSON, gardé 15 minutes),
-`/vignette/{fichier}` (les photos de TheMealDB relayées : la page n'accepte que ses propres
-images), `/manifest.webmanifest` (installable).
+Routes : `/` (la page), `/manifest.webmanifest` et `/sw.js` (la page s'ouvre aussi hors
+ligne), `/assets/…` (icônes et image de partage).
 
 ## L'app iPhone
 

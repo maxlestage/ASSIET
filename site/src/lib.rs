@@ -5,7 +5,6 @@
 //! (`client`) que dans le navigateur.
 
 pub mod islands;
-pub mod recipes;
 
 #[cfg(not(target_arch = "wasm32"))]
 pub mod server;
@@ -17,7 +16,4 @@ mod client;
 pub type Island = fn(&str) -> paquets::active::Node;
 
 /// Les îlots de la page, par nom : le même tableau sert au serveur et au navigateur.
-pub const ISLANDS: [(&str, Island); 2] = [
-    ("frigo-dessin", islands::frigo_dessin),
-    ("frigo", islands::frigo),
-];
+pub const ISLANDS: [(&str, Island); 1] = [("frigo-dessin", islands::frigo_dessin)];
