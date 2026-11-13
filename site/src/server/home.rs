@@ -87,7 +87,9 @@ pub fn page(site: &Site) -> Page {
             .child(terminal())
             .child(tui())
             .child(ios())
+            .child(tech_band())
             .child(architecture())
+            .child(dishes_band())
             .child(install())
             .child(share(&site.url)),
     )
@@ -202,20 +204,9 @@ fn hero() -> Element {
         .child(div().class("hero__art").child(island("frigo-dessin", "", frigo_dessin)))
 }
 
-/// Un bandeau d'ingrédients qui défile (deux copies pour une boucle sans couture).
-fn marquee() -> Element {
-    let words = [
-        "🍅 tomate",
-        "🥚 œufs",
-        "🧀 fromage",
-        "🍗 poulet",
-        "🥕 carotte",
-        "🍚 riz",
-        "🧅 oignon",
-        "🍋 citron",
-        "🍄 champignon",
-        "🥔 pomme de terre",
-    ];
+/// Un bandeau qui défile (plusieurs copies pour une boucle sans couture). `variant` choisit
+/// la couleur, l'inclinaison et le sens : `""` (encre), `"tomato"`, `"sun"`, `"mint"`.
+fn band(words: &[&'static str], variant: &str) -> Element {
     let track = |hidden: bool| {
         let t = div()
             .class("marquee__track")
@@ -226,10 +217,90 @@ fn marquee() -> Element {
             t
         }
     };
+    let class = if variant.is_empty() {
+        "marquee".to_owned()
+    } else {
+        format!("marquee marquee--{variant}")
+    };
+    // Quatre copies : même sur un grand écran, la boucle reste pleine (une seule est lue).
     div()
-        .class("marquee")
+        .class(class)
         .child(track(false))
-        .child(track(true))
+        .children((0..3).map(|_| track(true)))
+}
+
+/// Le bandeau d'ingrédients, sous le titre.
+fn marquee() -> Element {
+    band(
+        &[
+            "🍅 tomate",
+            "🥚 œufs",
+            "🧀 fromage",
+            "🍗 poulet",
+            "🥕 carotte",
+            "🍚 riz",
+            "🧅 oignon",
+            "🍋 citron",
+            "🍄 champignon",
+            "🥔 pomme de terre",
+        ],
+        "",
+    )
+}
+
+/// Le bandeau des technologies, avant l'architecture (dans l'autre sens).
+fn tech_band() -> Element {
+    band(
+        &[
+            "🦀 Rust",
+            "⚡ tokio",
+            "📦 Paquets",
+            "🕸️ WebAssembly",
+            "🖥️ ratatui",
+            "🍎 SwiftUI",
+            "💾 SwiftData",
+            "🔎 TheMealDB",
+            "🧪 Swift Testing",
+            "🧩 serde",
+        ],
+        "tomato",
+    )
+}
+
+/// Le bandeau des plats, avant l'installation.
+fn dishes_band() -> Element {
+    band(
+        &[
+            "🍝 pâtes",
+            "🥗 salade",
+            "🍲 soupe",
+            "🌮 tacos",
+            "🍛 curry",
+            "🥘 paella",
+            "🍳 omelette",
+            "🥞 crêpes",
+            "🍜 ramen",
+            "🥧 quiche",
+        ],
+        "sun",
+    )
+}
+
+/// Le bandeau du pied de page.
+fn footer_band() -> Element {
+    band(
+        &[
+            "✨ Gratuit",
+            "🔑 Sans clé d'API",
+            "🙅 Sans compte",
+            "🍪 Sans cookie",
+            "📱 Installable",
+            "📶 Hors ligne",
+            "🇫🇷 En français",
+            "💚 Open source",
+        ],
+        "mint",
+    )
 }
 
 fn head(eyebrow: &str, title: &str, lead: Option<&str>) -> Element {
@@ -844,6 +915,7 @@ fn site_footer(url: &str) -> Element {
         .collect();
     footer()
         .class("footer")
+        .child(footer_band())
         .child(
             div()
                 .class("footer__inner")
