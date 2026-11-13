@@ -1,8 +1,8 @@
 import Foundation
 
 /// Les noms d'ingrédients : minuscules, sans accents, au singulier, traduits du français
-/// vers l'anglais de TheMealDB, et comparés mot à mot. Le même algorithme que
-/// `frigo-core` (Rust).
+/// (ou de l'espagnol) vers l'anglais de TheMealDB, et comparés mot à mot. Le même
+/// algorithme que `frigo-core` (Rust).
 public enum Names {
     /// Ce que tout le monde a au placard : jamais « manquant » (sauf sans placard).
     public static let pantry: Set<String> = [
@@ -41,11 +41,51 @@ public enum Names {
         "bouillon": "stock", "vin blanc": "white wine", "vin rouge": "red wine", "eau": "water",
     ]
 
+    /// Espagnol → anglais. Les clés sont déjà normalisées : un pluriel en « -es » perd
+    /// seulement son « s » (« limones » → « limone »), d'où quelques clés en double. Une clé
+    /// qui est aussi un mot anglais de TheMealDB n'est jamais détournée (« pasta »,
+    /// « chorizo », « salmon », « cilantro » restent tels quels).
+    static let spanish: [String: String] = [
+        "pollo": "chicken", "pechuga de pollo": "chicken breast", "muslo de pollo": "chicken thigh",
+        "ternera": "beef", "carne de res": "beef", "carne picada": "minced beef",
+        "cerdo": "pork", "cordero": "lamb", "pato": "duck", "pavo": "turkey",
+        "tocino": "bacon", "beicon": "bacon", "panceta": "bacon", "jamon": "ham",
+        "salchicha": "sausage", "atun": "tuna", "bacalao": "cod",
+        "gamba": "prawn", "camaron": "prawn", "camarone": "prawn", "langostino": "prawn",
+        "mejillon": "mussel", "mejillone": "mussel", "huevo": "egg", "leche": "milk",
+        "mantequilla": "butter", "nata": "double cream", "queso": "cheese",
+        "parmesano": "parmesan", "queso parmesano": "parmesan", "queso feta": "feta",
+        "yogur": "yogurt", "arroz": "rice", "espagueti": "spaghetti", "fideo": "noodle",
+        "harina": "flour", "pan": "bread", "pan rallado": "breadcrumb",
+        "patata": "potato", "papa": "potato", "batata": "sweet potato", "boniato": "sweet potato",
+        "camote": "sweet potato", "zanahoria": "carrot", "cebolla": "onion",
+        "cebolla morada": "red onion", "cebolla roja": "red onion", "chalota": "shallot",
+        "ajo": "garlic", "tomate": "tomato", "tomate concentrado": "tomato puree",
+        "concentrado de tomate": "tomato puree", "pimiento": "red pepper",
+        "pimiento rojo": "red pepper", "calabacin": "courgette", "calabacine": "courgette",
+        "berenjena": "aubergine", "champinon": "mushroom", "champinone": "mushroom",
+        "seta": "mushroom", "espinaca": "spinach", "brocoli": "broccoli", "col": "cabbage",
+        "repollo": "cabbage", "coliflor": "cauliflower", "judia verde": "green bean",
+        "guisante": "peas", "lenteja": "lentil", "garbanzo": "chickpea", "maiz": "sweetcorn",
+        "pepino": "cucumber", "lechuga": "lettuce", "aguacate": "avocado",
+        "limon": "lemon", "limone": "lemon", "lima": "lime", "manzana": "apple",
+        "platano": "banana", "fresa": "strawberry", "naranja": "orange",
+        "jengibre": "ginger", "perejil": "parsley", "albahaca": "basil", "tomillo": "thyme",
+        "romero": "rosemary", "menta": "mint", "hierbabuena": "mint", "comino": "cumin",
+        "pimenton": "paprika", "canela": "cinnamon", "azucar": "sugar", "sal": "salt",
+        "pimienta": "black pepper", "pimienta negra": "black pepper", "aceite": "oil",
+        "aceite de oliva": "olive oil", "vinagre": "vinegar", "salsa de soja": "soy sauce",
+        "salsa de soya": "soy sauce", "miel": "honey", "mostaza": "mustard",
+        "coco": "coconut", "leche de coco": "coconut milk", "caldo": "stock",
+        "vino blanco": "white wine", "vino tinto": "red wine", "agua": "water",
+    ]
+
     /// Les mots qui ne disent rien de l'ingrédient (« chopped tomatoes » = des tomates).
     static let noise: Set<String> = [
         "fresh", "chopped", "minced", "sliced", "diced", "large", "small", "medium", "ground",
         "grated", "dried", "frozen", "boneless", "skinless", "finely", "roughly", "crushed",
         "whole", "free", "range", "organic", "of", "de", "du", "des", "la", "le", "les", "d",
+        "del", "el", "los", "las",
     ]
 
     static let keep: Set<String> = ["peas", "asparagus", "couscous", "hummus", "swiss", "molasses"]
@@ -80,10 +120,10 @@ public enum Names {
         return word
     }
 
-    /// Le nom normalisé, traduit en anglais quand il est français.
+    /// Le nom normalisé, traduit en anglais quand il est français ou espagnol.
     public static func canonical(_ name: String) -> String {
         let normalized = normalize(name)
-        return french[normalized].map(normalize) ?? normalized
+        return (french[normalized] ?? spanish[normalized]).map(normalize) ?? normalized
     }
 
     /// Le nom à donner à `filter.php?i=` (« chicken breast » → « chicken_breast »).

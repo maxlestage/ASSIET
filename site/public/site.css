@@ -321,6 +321,73 @@ pre {
   display: none;
 }
 
+/* ───────── Langues ───────── */
+
+.nav__end {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.langs {
+  display: inline-flex;
+  padding: 3px;
+  border: var(--border);
+  border-radius: 999px;
+  background: var(--paper);
+  box-shadow: var(--shadow-s);
+}
+
+.langs a {
+  display: grid;
+  place-items: center;
+  min-width: 34px;
+  min-height: 30px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s var(--spring);
+}
+
+.langs a:hover {
+  background: var(--sun-l);
+  transform: rotate(-4deg);
+}
+
+.langs a.is-current {
+  background: var(--ink);
+  color: #fff;
+}
+
+.langs--footer {
+  border-color: #fff;
+  background: transparent;
+  box-shadow: none;
+}
+
+.langs--footer a {
+  color: #e9e6fb;
+}
+
+.langs--footer a:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.langs--footer a.is-current {
+  background: var(--sun);
+  color: var(--ink);
+}
+
+/* Sur un petit téléphone, le bouton « Bientôt » laisse la place aux langues. */
+@media (max-width: 400px) {
+  .nav__soon {
+    display: none;
+  }
+}
+
 /* ───────── Titres ───────── */
 
 .eyebrow {
