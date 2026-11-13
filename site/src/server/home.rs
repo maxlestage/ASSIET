@@ -68,7 +68,6 @@ fn layout(site: &Site, title: &str, content: Element) -> Page {
             div()
                 .class("site")
                 .child(a().class("skip").href("#main").text("Aller au contenu"))
-                .child(div().class("progress").attr("aria-hidden", "true"))
                 .child(navbar())
                 .child(content.id("main"))
                 .child(site_footer(&site.url)),
@@ -125,6 +124,9 @@ pub fn not_found(site: &Site) -> Page {
 fn navbar() -> Element {
     header()
         .class("nav")
+        // La barre de progression, accrochée sous la navigation : toujours visible, même
+        // sur iPhone où le haut de l'écran passe sous la barre d'état.
+        .child(div().class("progress").attr("aria-hidden", "true"))
         .child(
             a().class("nav__brand")
                 .href("/")
