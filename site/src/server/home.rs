@@ -139,6 +139,7 @@ pub fn page(site: &Site) -> Page {
             .child(showcase::privacy(l))
             .child(tech_band(l))
             .child(architecture(l))
+            .child(showcase::pricing(l))
             .child(showcase::faq(l))
             .child(showcase::app_store(l))
             .child(share(&site.page_url(), l)),
@@ -235,11 +236,11 @@ fn navbar(l: Lang) -> Element {
                     a().href("#fonctions")
                         .text(l.t("Fonctions", "Features", "Funciones")),
                 )
-                .child(a().href("#faq").text(l.t("Questions", "FAQ", "Preguntas")))
                 .child(
-                    a().href("#partager")
-                        .text(l.t("Partager", "Share", "Compartir")),
-                ),
+                    a().href("#tarifs")
+                        .text(l.t("Tarifs", "Pricing", "Precios")),
+                )
+                .child(a().href("#faq").text(l.t("Questions", "FAQ", "Preguntas"))),
         )
         .child(
             div()
@@ -1065,6 +1066,7 @@ fn site_footer(url: &str, l: Lang) -> Element {
                     vec![
                         inside(l.t("Les écrans", "Screens", "Pantallas"), "ecrans"),
                         inside(l.t("Fonctionnalités", "Features", "Funciones"), "fonctions"),
+                        inside(l.t("Tarifs", "Pricing", "Precios"), "tarifs"),
                         inside(l.t("Confidentialité", "Privacy", "Privacidad"), "confidentialite"),
                         inside(l.t("Questions fréquentes", "FAQ", "Preguntas frecuentes"), "faq"),
                         inside(
