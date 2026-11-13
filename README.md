@@ -81,8 +81,8 @@ Une application [Paquets](https://github.com/maxlestage/Paquets) : la page est r
 serveur (lisible sans JavaScript), les parties interactives sont des îlots Rust compilés en
 WebAssembly. Un style plat en 2D, très coloré (bordures épaisses, ombres décalées) : un frigo
 dessiné qui s'ouvre et se remplit quand on le touche, un bandeau d'ingrédients qui défile,
-une démo en direct qui appelle `/api/recettes` (le même `frigo-core`), un terminal animé, la
-TUI et l'iPhone dessinés à plat, une carte de partage et un pied de page complet. Conçu pour le mobile d'abord, sans aucun défilement
+une démo en direct qui appelle `/api/recettes` (le même `frigo-core`), l'iPhone dessiné à
+plat, l'installation de l'app, une carte de partage et un pied de page complet. Conçu pour le mobile d'abord, sans aucun défilement
 horizontal (vérifié à 320, 375 et 1440 px). Le bundle WebAssembly pèse environ 85 ko
 compressé.
 

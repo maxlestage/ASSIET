@@ -15,8 +15,14 @@ async fn the_home_page_has_its_text_and_islands() {
     );
     assert!(html.contains("fridge__door"), "le frigo dessiné est rendu");
     assert!(html.contains("/site.css?v="));
-    for id in ["demo", "terminal", "tui", "ios", "installer"] {
+    for id in ["demo", "ios", "installer", "partager"] {
         assert!(html.contains(&format!("id=\"{id}\"")), "section #{id}");
+    }
+    for gone in ["id=\"terminal\"", "id=\"tui\"", "cargo install"] {
+        assert!(
+            !html.contains(gone),
+            "plus de terminal sur le site : {gone}"
+        );
     }
 }
 
