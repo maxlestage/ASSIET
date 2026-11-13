@@ -5,7 +5,9 @@
 use paquets::prelude::*;
 
 use super::share::{SHARE_TEXT, current_year, display_url, networks, qr_svg};
-use crate::islands::{frigo, frigo_dessin};
+use crate::islands::frigo_dessin;
+
+mod showcase;
 
 const REPO: &str = "https://github.com/maxlestage/ASSIET";
 const ISSUES: &str = "https://github.com/maxlestage/ASSIET/issues";
@@ -14,7 +16,7 @@ const LICENSE: &str = "https://github.com/maxlestage/ASSIET/blob/master/LICENSE"
 const PAQUETS: &str = "https://github.com/maxlestage/Paquets";
 const MEALDB: &str = "https://www.themealdb.com/";
 const TITLE: &str = "Frigo vide — la recette la plus rapide avec ce qu'il reste dans le frigo";
-const DESCRIPTION: &str = "Frigo vide lit vos ingrédients, interroge TheMealDB et trouve la meilleure recette à préparer. Installable sur téléphone, gratuit, et en app iPhone (SwiftUI).";
+const DESCRIPTION: &str = "Frigo vide, l'app iPhone qui lit vos ingrédients, interroge TheMealDB et trouve la meilleure recette à préparer. Bientôt sur l'App Store : gratuite, sans compte, sans publicité.";
 
 /// Ce que chaque page doit savoir : la version de la feuille de style et l'adresse
 /// publique du site (pour les liens de partage, le QR code et les aperçus).
@@ -82,12 +84,20 @@ pub fn page(site: &Site) -> Page {
             .child(hero())
             .child(marquee())
             .child(steps())
-            .child(demo())
+            .child(showcase::screens())
+            .child(showcase::features())
+            .child(showcase::numbers())
             .child(ios())
+            .child(showcase::pantry())
+            .child(showcase::week())
+            .child(dishes_band())
+            .child(showcase::leftovers())
+            .child(showcase::cuisines())
+            .child(showcase::privacy())
             .child(tech_band())
             .child(architecture())
-            .child(dishes_band())
-            .child(install())
+            .child(showcase::faq())
+            .child(showcase::app_store())
             .child(share(&site.url)),
     )
 }
@@ -136,16 +146,15 @@ fn navbar() -> Element {
             nav()
                 .class("nav__links")
                 .attr("aria-label", "Sections")
-                .child(a().href("#demo").text("Démo"))
-                .child(a().href("#ios").text("iPhone"))
-                .child(a().href("#installer").text("Installer"))
+                .child(a().href("#ecrans").text("L'app"))
+                .child(a().href("#fonctions").text("Fonctions"))
+                .child(a().href("#faq").text("Questions"))
                 .child(a().href("#partager").text("Partager")),
         )
         .child(
             a().class("btn btn--ink btn--small")
-                .href(REPO)
-                .attr("rel", "noopener")
-                .text("GitHub"),
+                .href("#telecharger")
+                .text("Bientôt"),
         )
 }
 
@@ -177,21 +186,21 @@ fn hero() -> Element {
         .child(
             div()
                 .class("hero__text")
-                .child(p().class("kicker").child(span().text("Rust")).child(span().text("Paquets")).child(span().text("SwiftUI")))
+                .child(p().class("kicker").child(span().text("iPhone")).child(span().text("Gratuit")).child(span().text("Sans compte")))
                 .child(
                     h1().class("hero__title")
                         .child(span().class("hero__line").text("Le frigo est vide\u{a0}?"))
                         .child(span().class("hero__line hero__line--mark").child(span().text("Pas l'assiette."))),
                 )
                 .child(p().class("lead").text(
-                    "Dites ce qu'il reste dans votre frigo. Frigo vide interroge TheMealDB, garde les recettes \
-                     que vous pouvez faire avec, et vous donne la meilleure, la plus rapide en cas d'égalité.",
+                    "Frigo vide est une app iPhone\u{a0}: dites-lui ce qu'il reste dans votre frigo, elle \
+                     cherche parmi les recettes du monde entier et vous donne la meilleure, la plus rapide en cas d'égalité.",
                 ))
                 .child(
                     div()
                         .class("ctas")
-                        .child(a().class("btn btn--tomato btn--big").href("#demo").text("Essayer maintenant →"))
-                        .child(a().class("btn btn--white btn--big").href("#installer").text("Installer l'app")),
+                        .child(a().class("btn btn--tomato btn--big").href("#ecrans").text("Découvrir l'app →"))
+                        .child(a().class("btn btn--white btn--big").href("#telecharger").text("Bientôt sur l'App Store")),
                 )
                 .child(
                     ul().class("stats")
@@ -251,15 +260,14 @@ fn marquee() -> Element {
 fn tech_band() -> Element {
     band(
         &[
-            "🦀 Rust",
-            "⚡ tokio",
-            "📦 Paquets",
-            "🕸️ WebAssembly",
+            "📱 iPhone",
             "🍎 SwiftUI",
+            "🫧 Liquid Glass",
             "💾 SwiftData",
             "🔎 TheMealDB",
-            "🧪 Swift Testing",
-            "🧩 serde",
+            "📳 Haptique",
+            "🌍 Recettes du monde",
+            "💚 Open source",
         ],
         "tomato",
     )
@@ -292,8 +300,8 @@ fn footer_band() -> Element {
             "🔑 Sans clé d'API",
             "🙅 Sans compte",
             "🍪 Sans cookie",
-            "📱 Installable",
-            "📶 Hors ligne",
+            "📱 Pour iPhone",
+            "🔒 Privée",
             "🇫🇷 En français",
             "💚 Open source",
         ],
@@ -318,13 +326,13 @@ fn steps() -> Element {
         (
             "🧊",
             "Videz le frigo",
-            "Tapez vos ingrédients, en français ou en anglais\u{a0}: «\u{a0}poulet\u{a0}», «\u{a0}œufs\u{a0}», «\u{a0}pommes de terre\u{a0}».",
+            "Dans l'app, tapez vos ingrédients, en français ou en anglais\u{a0}: «\u{a0}poulet\u{a0}», «\u{a0}œufs\u{a0}», «\u{a0}pommes de terre\u{a0}».",
             "sun",
         ),
         (
             "🔎",
-            "TheMealDB cherche",
-            "Une requête par ingrédient, en parallèle, puis le détail des recettes trouvées le plus souvent.",
+            "L'app cherche",
+            "Touchez «\u{a0}Trouver une recette\u{a0}»\u{a0}: chaque ingrédient est cherché dans TheMealDB, en même temps.",
             "mint",
         ),
         (
@@ -346,7 +354,7 @@ fn steps() -> Element {
         .child(head(
             "Comment ça marche",
             "Quatre étapes, zéro courses",
-            Some("Le même cœur Rust, frigo-core, fait tourner la démo de ce site ; l'app iPhone reprend le même algorithme."),
+            Some("Quelques secondes entre «\u{a0}qu'est-ce qu'on mange\u{a0}?\u{a0}» et le premier coup de couteau."),
         ))
         .child(
             ol().class("steps-grid")
@@ -372,18 +380,6 @@ fn steps() -> Element {
         )
 }
 
-fn demo() -> Element {
-    section()
-        .class("section section--band section--sky")
-        .id("demo")
-        .child(head(
-            "Démo en direct",
-            "Qu'est-ce qu'on mange\u{a0}?",
-            Some("Touchez une suggestion ou tapez un ingrédient, puis lancez la recherche. Les recettes viennent vraiment de TheMealDB."),
-        ))
-        .child(div().class("demo-wrap").attr("data-reveal", "").child(island("frigo", "poulet,riz,oignon", frigo)))
-}
-
 fn ios() -> Element {
     let cards = [
         ("Chicken Congee", "94 min · -3", "sun"),
@@ -396,16 +392,16 @@ fn ios() -> Element {
         .child(
             div()
                 .child(head(
-                    "Sur iPhone",
-                    "La même idée, en SwiftUI",
-                    Some("L'app iOS est écrite en Swift 6\u{a0}: SwiftUI, async/await et actors, SwiftData pour garder le frigo, et FrigoKit, le même algorithme que frigo-core, testé avec Swift Testing."),
+                    "Pensée pour l'iPhone",
+                    "Douce au toucher",
+                    Some("Écrite en SwiftUI pour iOS 26\u{a0}: le verre liquide d'iOS, des cartes qui arrivent en relief quand on fait défiler, et une petite vibration à chaque étape cochée."),
                 ))
                 .child(
                     ul().class("features")
-                        .child(li().text("📦 Le frigo enregistré sur l'appareil"))
-                        .child(li().text("⚡ Recherche en parallèle (TaskGroup)"))
-                        .child(li().text("📳 Retours haptiques et animations"))
-                        .child(li().text("🧩 Aucune dépendance externe")),
+                        .child(li().text("🫧 Liquid Glass, le style d'iOS 26"))
+                        .child(li().text("🃏 Des cartes qui arrivent en 3D"))
+                        .child(li().text("📳 Des vibrations douces"))
+                        .child(li().text("⚡ Une recherche rapide, tout en parallèle")),
                 ),
         )
         .child(
@@ -439,13 +435,13 @@ fn architecture() -> Element {
         (
             "📝",
             "Entrée",
-            "Le formulaire du site ou l'app iPhone",
+            "Le frigo de l'app, gardé avec SwiftData",
             "sun",
         ),
         (
-            "🦀",
-            "frigo-core",
-            "Normalisation (français → anglais, pluriels), client TheMealDB asynchrone",
+            "🧠",
+            "FrigoKit",
+            "Le français traduit pour TheMealDB, pluriels et accents compris",
             "tomato",
         ),
         (
@@ -463,14 +459,14 @@ fn architecture() -> Element {
         (
             "🖥️",
             "Affichage",
-            "Des cartes WebAssembly sur le site, SwiftUI sur iPhone",
+            "Des cartes SwiftUI, la meilleure en premier",
             "grape",
         ),
     ];
     section()
         .class("section")
         .id("architecture")
-        .child(head("Architecture", "Un cœur, deux visages", None))
+        .child(head("Sous le capot", "Du frigo à l'assiette", None))
         .child(
             ol().class("flow").children(blocks.iter().enumerate().map(
                 |(i, (icon, title, text, tone))| {
@@ -487,89 +483,6 @@ fn architecture() -> Element {
                         .child(p().text(*text))
                 },
             )),
-        )
-}
-
-fn install() -> Element {
-    let platforms = [
-        (
-            "📱 Android",
-            "Touchez «\u{a0}Installer l'app\u{a0}» ci-dessous, ou le menu ⋮ de Chrome puis «\u{a0}Installer l'application\u{a0}».",
-            "mint",
-        ),
-        (
-            "🍎 iPhone et iPad",
-            "Dans Safari, touchez Partager, puis «\u{a0}Sur l'écran d'accueil\u{a0}». Frigo vide s'ouvre ensuite comme une app.",
-            "sky",
-        ),
-        (
-            "💻 Ordinateur",
-            "Dans Chrome ou Edge, cliquez sur l'icône d'installation au bout de la barre d'adresse.",
-            "peach",
-        ),
-    ];
-    section()
-        .class("section section--center")
-        .id("installer")
-        .child(head(
-            "Installer",
-            "À table en un geste",
-            Some("Frigo vide s'installe sur l'écran d'accueil, sans passer par un store\u{a0}: gratuit, sans compte, et la page s'ouvre même sans réseau."),
-        ))
-        .child(
-            div()
-                .class("platforms")
-                .children(platforms.iter().enumerate().map(|(i, (label, text, tone))| {
-                    figure()
-                        .class(format!("platform platform--{tone}"))
-                        .attr("data-reveal", "")
-                        .style(format!("--d:{}ms", i * 80))
-                        .child(figcaption().text(*label))
-                        .child(p().text(*text))
-                })),
-        )
-        .child(
-            div()
-                .class("ctas ctas--center")
-                .attr("data-reveal", "")
-                .child(install_buttons("install--center"))
-                .child(
-                    a().class("btn btn--tomato btn--big")
-                        .href("#demo")
-                        .text("Essayer la démo"),
-                )
-                .child(
-                    a().class("btn btn--white btn--big")
-                        .href(REPO)
-                        .attr("rel", "noopener")
-                        .text("Le code sur GitHub"),
-                ),
-        )
-}
-
-/// Les boutons d'installation : cachés tant que le navigateur ne propose pas
-/// l'installation (le bundle les montre), et l'astuce pour Safari sur iPhone.
-fn install_buttons(class: &str) -> Element {
-    div()
-        .class(format!("install {class}"))
-        .child(
-            button()
-                .class("btn btn--sun")
-                .attr("type", "button")
-                .attr("data-install", "")
-                .attr("hidden", "")
-                .child(span().attr("aria-hidden", "true").text("⬇"))
-                .child(span().text("Installer l'app")),
-        )
-        .child(
-            p().class("install__ios")
-                .attr("data-install-ios", "")
-                .attr("hidden", "")
-                .text("Sur iPhone\u{a0}: touchez ")
-                .child(strong().text("Partager"))
-                .text(" puis ")
-                .child(strong().text("Sur l'écran d'accueil"))
-                .text("."),
         )
 }
 
@@ -619,7 +532,7 @@ fn share(url: &str) -> Element {
                                 .class("share-card__chips")
                                 .child(span().class("pill pill--white").text("Gratuit"))
                                 .child(span().class("pill pill--mint").text("Sans compte"))
-                                .child(span().class("pill pill--tomato").text("Hors ligne")),
+                                .child(span().class("pill pill--tomato").text("iPhone")),
                         ),
                 ),
         )
@@ -695,15 +608,12 @@ fn share(url: &str) -> Element {
                 })),
         )
         .child(
-            div()
-                .class("share-actions__more")
-                .child(install_buttons("install--share"))
-                .child(
-                    a().class("link")
-                        .href("/assets/og.png")
-                        .attr("download", "frigo-vide.png")
-                        .text("Télécharger l'image de partage"),
-                ),
+            div().class("share-actions__more").child(
+                a().class("link")
+                    .href("/assets/og.png")
+                    .attr("download", "frigo-vide.png")
+                    .text("Télécharger l'image de partage"),
+            ),
         );
 
     section()
@@ -712,7 +622,7 @@ fn share(url: &str) -> Element {
         .child(head(
             "Partager",
             "Faites tourner l'assiette",
-            Some("Montrez la carte à un ami, envoyez le lien, ou installez Frigo vide sur votre écran d'accueil\u{a0}: l'app s'ouvre comme une vraie application, même sans réseau."),
+            Some("Montrez la carte à un ami ou envoyez-lui le lien\u{a0}: il découvrira Frigo vide avant même sa sortie sur l'App Store."),
         ))
         .child(div().class("share__grid").child(card).child(actions))
 }
@@ -777,20 +687,20 @@ fn site_footer(url: &str) -> Element {
                                 .child(span().text("Frigo vide")),
                         )
                         .child(p().class("footer__pitch").text(
-                            "La meilleure recette avec ce qu'il reste dans le frigo. \
-                             Gratuit, sans compte, sans publicité.",
+                            "L'app iPhone qui trouve la meilleure recette avec ce qu'il reste dans le frigo. \
+                             Gratuite, sans compte, sans publicité.",
                         ))
-                        .child(install_buttons("install--footer"))
                         .child(div().class("footer__socials").children(quick)),
                 )
                 .child(footer_column(
                     "Produit",
                     "Le produit",
                     &[
-                        ("Démo en direct", "/#demo", false),
-                        ("Comment ça marche", "/#comment", false),
-                        ("App iPhone", "/#ios", false),
-                        ("Installer l'app", "/#installer", false),
+                        ("Les écrans", "/#ecrans", false),
+                        ("Fonctionnalités", "/#fonctions", false),
+                        ("Confidentialité", "/#confidentialite", false),
+                        ("Questions fréquentes", "/#faq", false),
+                        ("Bientôt sur l'App Store", "/#telecharger", false),
                     ],
                 ))
                 .child(footer_column(

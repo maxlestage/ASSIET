@@ -8,42 +8,40 @@ async fn the_home_page_has_its_text_and_islands() {
     assert_eq!(res.status(), 200);
     let html = res.text();
     assert!(html.contains("<html lang=\"fr\""));
-    assert!(html.contains("on mange"));
+    assert!(html.contains("Trois écrans, un repas"));
     assert!(
         html.contains("active-island"),
         "les îlots sont rendus par le serveur"
     );
     assert!(html.contains("fridge__door"), "le frigo dessiné est rendu");
     assert!(html.contains("/site.css?v="));
-    for id in ["demo", "ios", "installer", "partager"] {
+    for id in [
+        "ecrans",
+        "fonctions",
+        "ios",
+        "placard",
+        "semaine",
+        "anti-gaspi",
+        "cuisines",
+        "confidentialite",
+        "faq",
+        "telecharger",
+        "partager",
+    ] {
         assert!(html.contains(&format!("id=\"{id}\"")), "section #{id}");
     }
-    for gone in ["id=\"terminal\"", "id=\"tui\"", "cargo install"] {
+    for gone in [
+        "id=\"terminal\"",
+        "id=\"tui\"",
+        "cargo install",
+        "id=\"demo\"",
+        "/api/",
+    ] {
         assert!(
             !html.contains(gone),
-            "plus de terminal sur le site : {gone}"
+            "le site ne fait que montrer l'app : {gone}"
         );
     }
-}
-
-#[tokio::test]
-async fn an_empty_fridge_is_a_bad_request() {
-    let client = frigo_site::server::app().test().await;
-    let res = client.get("/api/recettes?i=").await;
-    assert_eq!(res.status(), 400);
-    assert!(res.text().contains("vide"));
-}
-
-#[tokio::test]
-async fn only_themealdb_images_are_relayed() {
-    let client = frigo_site::server::app().test().await;
-    // Bloqué par le pare-feu de Paquets (400) ou refusé par la route (404).
-    let traversal = client
-        .get("/vignette/..%2F..%2Fetc%2Fpasswd")
-        .await
-        .status();
-    assert!(traversal == 400 || traversal == 404, "{traversal}");
-    assert_eq!(client.get("/vignette/a.svg").await.status(), 404);
 }
 
 #[tokio::test]
@@ -75,7 +73,6 @@ async fn the_app_is_installable_with_its_own_icons() {
     );
     let html = client.get("/").await.text();
     assert!(html.contains(r#"<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"/>"#));
-    assert!(html.contains("data-install"), "le bouton d'installation");
 }
 
 #[tokio::test]
