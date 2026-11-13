@@ -126,10 +126,13 @@ pre {
 }
 
 .progress {
-  position: fixed;
-  inset: 0 0 auto 0;
+  position: absolute;
+  top: calc(100% + 3px);
+  left: 0;
+  right: 0;
   z-index: 60;
   height: 6px;
+  pointer-events: none;
   background: repeating-linear-gradient(90deg, var(--tomato) 0 40px, var(--sun) 40px 80px, var(--mint) 80px 120px, var(--sky) 120px 160px, var(--grape) 160px 200px);
   transform: scaleX(var(--scroll));
   transform-origin: 0 50%;
