@@ -993,3 +993,230 @@ pub fn app_store(l: Lang) -> Element {
                 ),
         )
 }
+
+/// Une ligne d'offre : une coche, le texte, et « bientôt » pour ce qui n'existe pas encore.
+fn perk(l: Lang, text: &'static str, detail: Option<&'static str>, soon: bool) -> Element {
+    let mut item = li().class("plan__perk").child(
+        span()
+            .class("plan__check")
+            .attr("aria-hidden", "true")
+            .text("✓"),
+    );
+    let mut body = span().class("plan__text").child(strong().text(text));
+    if let Some(detail) = detail {
+        body = body.child(span().text(detail));
+    }
+    item = item.child(body);
+    if soon {
+        item = item.child(
+            span()
+                .class("plan__soon")
+                .text(l.t("bientôt", "soon", "pronto")),
+        );
+    }
+    item
+}
+
+/// Les tarifs : Gratuit (tout ce que fait l'app aujourd'hui) et Premium (en préparation).
+pub fn pricing(l: Lang) -> Element {
+    let free = div()
+        .class("plan plan--free")
+        .attr("data-reveal", "")
+        .child(
+            p().class("plan__name")
+                .text(l.t("Gratuit", "Free", "Gratis")),
+        )
+        .child(
+            p().class("plan__price")
+                .child(strong().text(l.t("0\u{a0}€", "$0", "0\u{a0}€")))
+                .child(span().text(l.t(
+                    "pour cuisiner tous les soirs",
+                    "to cook every night",
+                    "para cocinar cada noche",
+                ))),
+        )
+        .child(
+            ul().class("plan__perks")
+                .child(perk(
+                    l,
+                    l.t(
+                        "Le frigo enregistré",
+                        "Your saved fridge",
+                        "La nevera guardada",
+                    ),
+                    Some(l.t(
+                        "et 12 suggestions à un toucher",
+                        "and 12 one-tap suggestions",
+                        "y 12 sugerencias a un toque",
+                    )),
+                    false,
+                ))
+                .child(perk(
+                    l,
+                    l.t(
+                        "La recherche de recettes",
+                        "Recipe search",
+                        "La búsqueda de recetas",
+                    ),
+                    Some(l.t(
+                        "la meilleure en premier",
+                        "the best one first",
+                        "la mejor primero",
+                    )),
+                    false,
+                ))
+                .child(perk(
+                    l,
+                    l.t(
+                        "Sans courses et le placard",
+                        "No shopping and the cupboard",
+                        "Sin compras y la despensa",
+                    ),
+                    None,
+                    false,
+                ))
+                .child(perk(
+                    l,
+                    l.t("Le temps estimé", "Estimated time", "El tiempo estimado"),
+                    None,
+                    false,
+                ))
+                .child(perk(
+                    l,
+                    l.t(
+                        "Les étapes à cocher et la vidéo",
+                        "Steps to tick and the video",
+                        "Los pasos para marcar y el vídeo",
+                    ),
+                    None,
+                    false,
+                ))
+                .child(perk(
+                    l,
+                    l.t(
+                        "En français, anglais et espagnol",
+                        "In English, French and Spanish",
+                        "En español, inglés y francés",
+                    ),
+                    None,
+                    false,
+                )),
+        )
+        .child(
+            a().class("btn btn--white btn--big plan__cta")
+                .href("#telecharger")
+                .text(l.t(
+                    "Bientôt sur l'App Store",
+                    "Coming soon to the App Store",
+                    "Muy pronto en el App Store",
+                )),
+        );
+
+    let premium = div()
+        .class("plan plan--premium")
+        .attr("data-reveal", "")
+        .style("--d:120ms")
+        .child(span().class("plan__badge").text(l.t(
+            "En préparation",
+            "In the works",
+            "En preparación",
+        )))
+        .child(p().class("plan__name").text("Premium"))
+        .child(
+            p().class("plan__price plan__price--tbd")
+                .child(strong().text(l.t(
+                    "Prix annoncé à la sortie",
+                    "Price announced at launch",
+                    "Precio anunciado en el lanzamiento",
+                )))
+                .child(span().text(l.t(
+                    "pour aller plus loin",
+                    "to go further",
+                    "para ir más lejos",
+                ))),
+        )
+        .child(
+            ul().class("plan__perks")
+                .child(perk(
+                    l,
+                    l.t(
+                        "Tout ce qui est gratuit",
+                        "Everything in Free",
+                        "Todo lo gratuito",
+                    ),
+                    None,
+                    false,
+                ))
+                .child(perk(
+                    l,
+                    l.t(
+                        "La liste de courses",
+                        "Shopping list",
+                        "La lista de la compra",
+                    ),
+                    Some(l.t(
+                        "les ingrédients manquants ajoutés d'un toucher",
+                        "missing ingredients added in one tap",
+                        "los ingredientes que faltan, añadidos de un toque",
+                    )),
+                    true,
+                ))
+                .child(perk(
+                    l,
+                    l.t(
+                        "Le planning de la semaine",
+                        "Weekly meal plan",
+                        "La planificación de la semana",
+                    ),
+                    Some(l.t(
+                        "sept soirs prévus avec ce qu'il y a au frigo",
+                        "seven nights planned with what's in the fridge",
+                        "siete noches planificadas con lo que hay en la nevera",
+                    )),
+                    true,
+                ))
+                .child(perk(
+                    l,
+                    l.t(
+                        "Les filtres avancés",
+                        "Advanced filters",
+                        "Filtros avanzados",
+                    ),
+                    Some(l.t(
+                        "temps maximum, catégorie, cuisine du monde",
+                        "maximum time, category, world cuisine",
+                        "tiempo máximo, categoría, cocina del mundo",
+                    )),
+                    true,
+                )),
+        )
+        .child(
+            span()
+                .class("btn btn--ink btn--big btn--soon plan__cta")
+                .attr("aria-disabled", "true")
+                .text(l.t("Bientôt", "Coming soon", "Muy pronto")),
+        );
+
+    section()
+        .class("section section--center")
+        .id("tarifs")
+        .child(head(
+            l.t("Tarifs", "Pricing", "Precios"),
+            l.t(
+                "Gratuit pour cuisiner, Premium pour s'organiser",
+                "Free to cook, Premium to get organised",
+                "Gratis para cocinar, Premium para organizarte",
+            ),
+            Some(l.t(
+                "Tout ce que fait l'app aujourd'hui est gratuit. Premium ajoutera de quoi préparer la semaine.",
+                "Everything the app does today is free. Premium will add what you need to plan the week.",
+                "Todo lo que hace la app hoy es gratis. Premium añadirá lo necesario para preparar la semana.",
+            )),
+        ))
+        .child(div().class("pricing").child(free).child(premium))
+        .child(p().class("pricing__note").text(l.t(
+            "Les fonctions Premium sont en préparation\u{a0}: elles et leur prix seront annoncés à la sortie de l'app.",
+            "Premium features are in the works: they and their price will be announced when the app launches.",
+            "Las funciones Premium están en preparación: ellas y su precio se anunciarán con el lanzamiento de la app.",
+        )))
+}

@@ -83,7 +83,7 @@ passe dans l'app. Un style plat en 2D, très coloré (bordures épaisses, ombres
 frigo dessiné qui s'ouvre quand on le touche (un îlot Rust compilé en WebAssembly), des
 bandeaux qui défilent, les trois écrans de l'app dessinés à plat, les fonctionnalités, des
 chiffres, le placard, une semaine de repas, l'anti-gaspi, les cuisines du monde, la
-confidentialité, l'architecture, les questions fréquentes, l'annonce de l'App Store, une
+confidentialité, l'architecture, les tarifs (Gratuit et Premium), les questions fréquentes, l'annonce de l'App Store, une
 carte de partage et un pied de page complet. En trois langues : le français à la racine,
 l'anglais sous `/en/` et l'espagnol sous `/es/` (`site/src/i18n.rs`, un sélecteur FR · EN · ES,
 des liens `hreflang` et une image de partage par langue). Conçu pour le mobile d'abord, sans aucun

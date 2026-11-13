@@ -142,3 +142,15 @@ async fn the_site_speaks_french_english_and_spanish() {
     assert_eq!(missing.status(), 404);
     assert!(missing.text().contains("Esta despensa está vacía"));
 }
+
+#[tokio::test]
+async fn the_pricing_section_shows_free_and_premium() {
+    let client = frigo_site::server::app().test().await;
+    let fr = client.get("/").await.text();
+    assert!(fr.contains("id=\"tarifs\""));
+    assert!(fr.contains("Prix annoncé à la sortie"), "pas de prix inventé");
+    assert!(fr.contains("La liste de courses"));
+    let en = client.get("/en/").await.text();
+    assert!(en.contains("Price announced at launch"));
+    assert!(en.contains("href=\"#tarifs\""));
+}
