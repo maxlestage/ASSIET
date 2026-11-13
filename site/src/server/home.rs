@@ -87,9 +87,9 @@ fn layout(site: &Site, title: &str, content: Element) -> Page {
     Page::new(title)
         .lang(l.code())
         .description(l.t(
-            "Frigo vide, l'app iPhone qui lit vos ingrédients, interroge TheMealDB et trouve la meilleure recette à préparer. Bientôt sur l'App Store : gratuite, sans compte, sans publicité.",
-            "Frigo vide, the iPhone app that reads your ingredients, searches TheMealDB and finds the best recipe to cook. Coming soon to the App Store: free, no account, no ads.",
-            "Frigo vide, la app para iPhone que lee tus ingredientes, busca en TheMealDB y encuentra la mejor receta. Muy pronto en el App Store: gratis, sin cuenta, sin anuncios.",
+            "Frigo vide, l'app iPhone qui lit vos ingrédients, interroge TheMealDB et trouve la meilleure recette à préparer. Bientôt sur l'App Store : gratuite à télécharger, sans compte.",
+            "Frigo vide, the iPhone app that reads your ingredients, searches TheMealDB and finds the best recipe to cook. Coming soon to the App Store: free to download, no account.",
+            "Frigo vide, la app para iPhone que lee tus ingredientes, busca en TheMealDB y encuentra la mejor receta. Muy pronto en el App Store: gratis para descargar, sin cuenta.",
         ))
         .seo(seo)
         .plain()
@@ -284,7 +284,7 @@ fn hero(l: Lang) -> Element {
                 .child(
                     p().class("kicker")
                         .child(span().text("iPhone"))
-                        .child(span().text(l.t("Gratuit", "Free", "Gratis")))
+                        .child(span().text("Freemium"))
                         .child(span().text(l.t("Sans compte", "No account", "Sin cuenta"))),
                 )
                 .child(
@@ -341,8 +341,8 @@ fn hero(l: Lang) -> Element {
                         )
                         .child(
                             li().class("stat stat--sky")
-                                .child(strong().text("100\u{a0}%"))
-                                .text(l.t(" gratuit", " free", " gratis")),
+                                .child(strong().text("3"))
+                                .text(l.t(" langues", " languages", " idiomas")),
                         ),
                 ),
         )
@@ -505,7 +505,7 @@ fn dishes_band(l: Lang) -> Element {
 fn footer_band(l: Lang) -> Element {
     let words: &[&'static str] = match l {
         Lang::Fr => &[
-            "✨ Gratuit",
+            "✨ Freemium",
             "🔑 Sans clé d'API",
             "🙅 Sans compte",
             "🍪 Sans cookie",
@@ -515,7 +515,7 @@ fn footer_band(l: Lang) -> Element {
             "💚 Open source",
         ],
         Lang::En => &[
-            "✨ Free",
+            "✨ Freemium",
             "🔑 No API key",
             "🙅 No account",
             "🍪 No cookies",
@@ -525,7 +525,7 @@ fn footer_band(l: Lang) -> Element {
             "💚 Open source",
         ],
         Lang::Es => &[
-            "✨ Gratis",
+            "✨ Freemium",
             "🔑 Sin clave de API",
             "🙅 Sin cuenta",
             "🍪 Sin cookies",
@@ -865,11 +865,7 @@ fn share(url: &str, l: Lang) -> Element {
                         .child(
                             div()
                                 .class("share-card__chips")
-                                .child(
-                                    span()
-                                        .class("pill pill--white")
-                                        .text(l.t("Gratuit", "Free", "Gratis")),
-                                )
+                                .child(span().class("pill pill--white").text("Freemium"))
                                 .child(span().class("pill pill--mint").text(l.t(
                                     "Sans compte",
                                     "No account",
@@ -1057,9 +1053,9 @@ fn site_footer(url: &str, l: Lang) -> Element {
                                 .child(span().text("Frigo vide")),
                         )
                         .child(p().class("footer__pitch").text(l.t(
-                            "L'app iPhone qui trouve la meilleure recette avec ce qu'il reste dans le frigo. Gratuite, sans compte, sans publicité.",
-                            "The iPhone app that finds the best recipe with what's left in your fridge. Free, no account, no ads.",
-                            "La app para iPhone que encuentra la mejor receta con lo que queda en la nevera. Gratis, sin cuenta, sin anuncios.",
+                            "L'app iPhone qui trouve la meilleure recette avec ce qu'il reste dans le frigo. Gratuite à télécharger, sans compte.",
+                            "The iPhone app that finds the best recipe with what's left in your fridge. Free to download, no account.",
+                            "La app para iPhone que encuentra la mejor receta con lo que queda en la nevera. Gratis para descargar, sin cuenta.",
                         )))
                         .child(languages(l, "langs--footer"))
                         .child(div().class("footer__socials").children(quick)),
