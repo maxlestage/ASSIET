@@ -5,6 +5,7 @@
 mod api;
 pub mod export;
 mod home;
+pub mod share;
 
 use std::path::{Path, PathBuf};
 
@@ -36,10 +37,10 @@ pub fn app() -> App {
     let css_version = version(&css);
     let mut app = App::new();
     let v = css_version.clone();
-    app.get("/", move |_req: Request| {
-        let v = v.clone();
+    app.get("/", move |req: Request| {
+        let site = home::Site::new(&v, share::public_url(&req));
         async move {
-            home::page(&v)
+            home::page(&site)
                 .into_response()
                 .header("cache-control", "no-cache")
         }
@@ -54,15 +55,23 @@ pub fn app() -> App {
         Pwa::new("Frigo vide")
             .short_name("Frigo vide")
             .description("La recette la plus rapide avec ce qu'il reste dans le frigo.")
+            .id("/")
             .start_url("/")
+            .scope("/")
+            .display("standalone")
+            .lang("fr")
             .theme_color("#fff8ec")
             .background_color("#fff8ec")
-            .categories(["food", "lifestyle", "utilities"]),
+            .categories(["food", "lifestyle", "utilities"])
+            .icon("/assets/icon-192.png", "192x192", "image/png")
+            .icon("/assets/icon-512.png", "512x512", "image/png")
+            .maskable_icon("/assets/icon-maskable-512.png", "512x512", "image/png")
+            .icon("/assets/logo.svg", "any", "image/svg+xml"),
     );
     let v = css_version;
-    app.fallback(move |_req: Request| {
-        let v = v.clone();
-        async move { home::not_found(&v).into_response().status(404) }
+    app.fallback(move |req: Request| {
+        let site = home::Site::new(&v, share::public_url(&req));
+        async move { home::not_found(&site).into_response().status(404) }
     });
     app
 }

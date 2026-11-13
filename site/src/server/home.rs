@@ -4,14 +4,46 @@
 
 use paquets::prelude::*;
 
+use super::share::{SHARE_TEXT, current_year, display_url, networks, qr_svg};
 use crate::islands::{frigo, frigo_dessin};
 
 const REPO: &str = "https://github.com/maxlestage/ASSIET";
+const ISSUES: &str = "https://github.com/maxlestage/ASSIET/issues";
+const README: &str = "https://github.com/maxlestage/ASSIET#readme";
+const LICENSE: &str = "https://github.com/maxlestage/ASSIET/blob/master/LICENSE";
+const PAQUETS: &str = "https://github.com/maxlestage/Paquets";
+const MEALDB: &str = "https://www.themealdb.com/";
 const TITLE: &str = "Frigo vide — la recette la plus rapide avec ce qu'il reste dans le frigo";
 const DESCRIPTION: &str = "Frigo vide lit vos ingrédients, interroge TheMealDB et trouve la meilleure recette à préparer. En Rust (CLI et TUI) et sur iPhone (SwiftUI).";
 
-fn layout(css_version: &str, title: &str, content: Element) -> Page {
-    let head = r##"<meta name="color-scheme" content="light"/><link rel="icon" href="/assets/logo.svg" type="image/svg+xml"/><link rel="apple-touch-icon" href="/assets/logo.svg"/>"##;
+/// Ce que chaque page doit savoir : la version de la feuille de style et l'adresse
+/// publique du site (pour les liens de partage, le QR code et les aperçus).
+pub struct Site {
+    css_version: String,
+    url: String,
+}
+
+impl Site {
+    pub fn new(css_version: &str, url: String) -> Self {
+        Self {
+            css_version: css_version.to_owned(),
+            url,
+        }
+    }
+}
+
+fn layout(site: &Site, title: &str, content: Element) -> Page {
+    let head = concat!(
+        r##"<meta name="color-scheme" content="light"/>"##,
+        r##"<link rel="icon" href="/assets/logo.svg" type="image/svg+xml"/>"##,
+        r##"<link rel="icon" href="/assets/favicon-32.png" type="image/png" sizes="32x32"/>"##,
+        r##"<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"/>"##,
+        r##"<meta name="mobile-web-app-capable" content="yes"/>"##,
+        r##"<meta name="apple-mobile-web-app-capable" content="yes"/>"##,
+        r##"<meta name="apple-mobile-web-app-title" content="Frigo vide"/>"##,
+        r##"<meta name="apple-mobile-web-app-status-bar-style" content="default"/>"##,
+        r##"<meta name="application-name" content="Frigo vide"/>"##,
+    );
     Page::new(title)
         .lang("fr")
         .description(DESCRIPTION)
@@ -20,11 +52,17 @@ fn layout(css_version: &str, title: &str, content: Element) -> Page {
                 .site_name("Frigo vide")
                 .og_type("website")
                 .locale("fr_FR")
-                .image("/assets/og.svg")
-                .canonical("/"),
+                .image(format!("{}assets/og.png", site.url))
+                .meta_property("og:image:width", "1200")
+                .meta_property("og:image:height", "630")
+                .meta_property(
+                    "og:image:alt",
+                    "Frigo vide : le frigo est vide ? Pas l'assiette.",
+                )
+                .canonical(site.url.clone()),
         )
         .plain()
-        .stylesheet(format!("/site.css?v={css_version}"))
+        .stylesheet(format!("/site.css?v={}", site.css_version))
         .head(head)
         .body(
             div()
@@ -33,13 +71,13 @@ fn layout(css_version: &str, title: &str, content: Element) -> Page {
                 .child(div().class("progress").attr("aria-hidden", "true"))
                 .child(navbar())
                 .child(content.id("main"))
-                .child(site_footer()),
+                .child(site_footer(&site.url)),
         )
 }
 
-pub fn page(css_version: &str) -> Page {
+pub fn page(site: &Site) -> Page {
     layout(
-        css_version,
+        site,
         TITLE,
         html::main()
             .child(hero())
@@ -50,13 +88,14 @@ pub fn page(css_version: &str) -> Page {
             .child(tui())
             .child(ios())
             .child(architecture())
-            .child(install()),
+            .child(install())
+            .child(share(&site.url)),
     )
 }
 
-pub fn not_found(css_version: &str) -> Page {
+pub fn not_found(site: &Site) -> Page {
     layout(
-        css_version,
+        site,
         "Page introuvable — Frigo vide",
         html::main().child(
             section()
@@ -98,7 +137,8 @@ fn navbar() -> Element {
                 .child(a().href("#demo").text("Démo"))
                 .child(a().href("#terminal").text("CLI"))
                 .child(a().href("#ios").text("iPhone"))
-                .child(a().href("#installer").text("Installer")),
+                .child(a().href("#installer").text("Installer"))
+                .child(a().href("#partager").text("Partager")),
         )
         .child(
             a().class("btn btn--ink btn--small")
@@ -589,22 +629,287 @@ fn install() -> Element {
         )
 }
 
-fn site_footer() -> Element {
+/// Les boutons d'installation : cachés tant que le navigateur ne propose pas
+/// l'installation (le bundle les montre), et l'astuce pour Safari sur iPhone.
+fn install_buttons(class: &str) -> Element {
+    div()
+        .class(format!("install {class}"))
+        .child(
+            button()
+                .class("btn btn--sun")
+                .attr("type", "button")
+                .attr("data-install", "")
+                .attr("hidden", "")
+                .child(span().attr("aria-hidden", "true").text("⬇"))
+                .child(span().text("Installer l'app")),
+        )
+        .child(
+            p().class("install__ios")
+                .attr("data-install-ios", "")
+                .attr("hidden", "")
+                .text("Sur iPhone\u{a0}: touchez ")
+                .child(strong().text("Partager"))
+                .text(" puis ")
+                .child(strong().text("Sur l'écran d'accueil"))
+                .text("."),
+        )
+}
+
+/// La carte de partage : une carte à scanner (QR code), le partage du téléphone, la copie
+/// du lien et des liens directs vers les messageries et les réseaux.
+fn share(url: &str) -> Element {
+    let shown = display_url(url).to_owned();
+    let card = figure()
+        .class("share-card")
+        .attr("data-reveal", "")
+        .child(
+            div()
+                .class("share-card__top")
+                .child(
+                    span()
+                        .class("logo logo--white")
+                        .attr("aria-hidden", "true")
+                        .text("🧊"),
+                )
+                .child(
+                    div()
+                        .child(strong().class("share-card__name").text("Frigo vide"))
+                        .child(
+                            span()
+                                .class("share-card__tag")
+                                .text("La recette avec ce qu'il reste"),
+                        ),
+                ),
+        )
+        .child(
+            div()
+                .class("share-card__body")
+                .child(div().class("share-card__qr").html(qr_svg(url)))
+                .child(
+                    div()
+                        .class("share-card__text")
+                        .child(
+                            p().class("share-card__claim")
+                                .text("Le frigo est vide\u{a0}? Pas l'assiette."),
+                        )
+                        .child(
+                            p().class("share-card__hint")
+                                .text("📱 Scannez avec l'appareil photo"),
+                        )
+                        .child(
+                            div()
+                                .class("share-card__chips")
+                                .child(span().class("pill pill--white").text("Gratuit"))
+                                .child(span().class("pill pill--mint").text("Sans compte"))
+                                .child(span().class("pill pill--tomato").text("Hors ligne")),
+                        ),
+                ),
+        )
+        .child(
+            figcaption()
+                .class("share-card__url")
+                .child(span().class("share-card__dot").attr("aria-hidden", "true"))
+                .child(code().text(shown)),
+        );
+
+    let actions = div()
+        .class("share-actions")
+        .attr("data-reveal", "")
+        .style("--d:120ms")
+        .child(
+            div()
+                .class("share-actions__main")
+                .child(
+                    button()
+                        .class("btn btn--tomato btn--big")
+                        .attr("type", "button")
+                        .attr("data-share", "")
+                        .attr("data-url", url.to_owned())
+                        .attr("data-title", "Frigo vide")
+                        .attr("data-text", SHARE_TEXT)
+                        .attr("hidden", "")
+                        .child(span().attr("aria-hidden", "true").text("↗"))
+                        .child(span().text("Partager…")),
+                )
+                .child(
+                    button()
+                        .class("btn btn--white btn--big")
+                        .attr("type", "button")
+                        .attr("data-copy", url.to_owned())
+                        .attr("hidden", "")
+                        .child(span().attr("aria-hidden", "true").text("🔗"))
+                        .child(span().attr("data-copy-label", "").text("Copier le lien")),
+                ),
+        )
+        .child(
+            label()
+                .class("share-link")
+                .child(span().class("share-link__label").text("Le lien"))
+                .child(
+                    input()
+                        .attr("type", "url")
+                        .attr("readonly", "")
+                        .attr("value", url.to_owned())
+                        .attr("aria-label", "Le lien du site, à copier"),
+                ),
+        )
+        .child(p().class("share-actions__title").text("Envoyer par"))
+        .child(
+            ul().class("networks")
+                .children(networks(url).into_iter().map(|n| {
+                    li().child(
+                        a().class(format!("network network--{}", n.tone))
+                            .href(n.href)
+                            .attr("target", "_blank")
+                            .attr("rel", "noopener noreferrer")
+                            .attr(
+                                "aria-label",
+                                format!("Partager sur {} (nouvel onglet)", n.name),
+                            )
+                            .child(
+                                span()
+                                    .class("network__badge")
+                                    .attr("aria-hidden", "true")
+                                    .text(n.badge),
+                            )
+                            .child(span().text(n.name)),
+                    )
+                })),
+        )
+        .child(
+            div()
+                .class("share-actions__more")
+                .child(install_buttons("install--share"))
+                .child(
+                    a().class("link")
+                        .href("/assets/og.png")
+                        .attr("download", "frigo-vide.png")
+                        .text("Télécharger l'image de partage"),
+                ),
+        );
+
+    section()
+        .class("section section--band section--sun share")
+        .id("partager")
+        .child(head(
+            "Partager",
+            "Faites tourner l'assiette",
+            Some("Montrez la carte à un ami, envoyez le lien, ou installez Frigo vide sur votre écran d'accueil\u{a0}: l'app s'ouvre comme une vraie application, même sans réseau."),
+        ))
+        .child(div().class("share__grid").child(card).child(actions))
+}
+
+fn footer_column(
+    title: &str,
+    label: &str,
+    links: &[(&'static str, &'static str, bool)],
+) -> Element {
+    nav()
+        .class("footer__col")
+        .attr("aria-label", label.to_owned())
+        .child(h2().class("footer__title").text(title.to_owned()))
+        .child(ul().children(links.iter().map(|(text, href, external)| {
+            let link = a().href(*href).text(*text);
+            let link = if *external {
+                link.attr("rel", "noopener")
+            } else {
+                link
+            };
+            li().child(link)
+        })))
+}
+
+fn site_footer(url: &str) -> Element {
+    let networks = networks(url);
+    let quick: Vec<Element> = networks
+        .iter()
+        .filter(|n| {
+            matches!(
+                n.name,
+                "WhatsApp" | "Telegram" | "X" | "LinkedIn" | "E-mail"
+            )
+        })
+        .map(|n| {
+            a().class(format!("footer__social network--{}", n.tone))
+                .href(n.href.clone())
+                .attr("target", "_blank")
+                .attr("rel", "noopener noreferrer")
+                .attr(
+                    "aria-label",
+                    format!("Partager sur {} (nouvel onglet)", n.name),
+                )
+                .attr("title", n.name)
+                .text(n.badge)
+        })
+        .collect();
     footer()
         .class("footer")
         .child(
-            p().class("footer__emoji")
-                .attr("aria-hidden", "true")
-                .text("🍅 🥕 🧀 🥚 🍋"),
-        )
-        .child(p().text("Frigo vide · écrit en Rust avec Paquets, et en Swift pour l'iPhone."))
-        .child(
-            p().class("footer__small")
+            div()
+                .class("footer__inner")
                 .child(
-                    a().href("https://www.themealdb.com/")
-                        .attr("rel", "noopener")
-                        .text("Recettes\u{a0}: TheMealDB"),
+                    div()
+                        .class("footer__brand")
+                        .child(
+                            a().class("nav__brand footer__logo")
+                                .href("/")
+                                .attr("aria-label", "Frigo vide, accueil")
+                                .child(span().class("logo").attr("aria-hidden", "true").text("🧊"))
+                                .child(span().text("Frigo vide")),
+                        )
+                        .child(p().class("footer__pitch").text(
+                            "La meilleure recette avec ce qu'il reste dans le frigo. \
+                             Gratuit, sans compte, sans publicité.",
+                        ))
+                        .child(install_buttons("install--footer"))
+                        .child(div().class("footer__socials").children(quick)),
                 )
-                .text(" · Licence MIT"),
+                .child(footer_column(
+                    "Produit",
+                    "Le produit",
+                    &[
+                        ("Démo en direct", "/#demo", false),
+                        ("Ligne de commande", "/#terminal", false),
+                        ("Interface plein écran", "/#tui", false),
+                        ("App iPhone", "/#ios", false),
+                        ("Installer", "/#installer", false),
+                    ],
+                ))
+                .child(footer_column(
+                    "Ressources",
+                    "Les ressources",
+                    &[
+                        ("Code source", REPO, true),
+                        ("Documentation", README, true),
+                        ("Signaler un problème", ISSUES, true),
+                        ("TheMealDB", MEALDB, true),
+                        ("Paquets", PAQUETS, true),
+                    ],
+                ))
+                .child(footer_column(
+                    "Partager",
+                    "Partager",
+                    &[
+                        ("La carte à scanner", "/#partager", false),
+                        ("Image de partage", "/assets/og.png", false),
+                        ("Licence MIT", LICENSE, true),
+                    ],
+                )),
+        )
+        .child(
+            div()
+                .class("footer__bottom")
+                .child(p().text(format!("© {} Frigo vide · Licence MIT", current_year())))
+                .child(
+                    p().class("footer__trust")
+                        .child(span().text("🍪 Aucun cookie"))
+                        .child(span().text("🔒 Aucun traçage"))
+                        .child(span().text("🦀 Rust & Swift")),
+                )
+                .child(
+                    a().class("footer__top")
+                        .href("#main")
+                        .text("Haut de page ↑"),
+                ),
         )
 }

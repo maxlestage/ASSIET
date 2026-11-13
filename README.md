@@ -82,7 +82,7 @@ serveur (lisible sans JavaScript), les parties interactives sont des îlots Rust
 WebAssembly. Un style plat en 2D, très coloré (bordures épaisses, ombres décalées) : un frigo
 dessiné qui s'ouvre et se remplit quand on le touche, un bandeau d'ingrédients qui défile,
 une démo en direct qui appelle `/api/recettes` (le même `frigo-core`), un terminal animé, la
-TUI et l'iPhone dessinés à plat. Conçu pour le mobile d'abord, sans aucun défilement
+TUI et l'iPhone dessinés à plat, une carte de partage et un pied de page complet. Conçu pour le mobile d'abord, sans aucun défilement
 horizontal (vérifié à 320, 375 et 1440 px). Le bundle WebAssembly pèse environ 85 ko
 compressé.
 
@@ -95,6 +95,23 @@ wasm-bindgen --target web --no-typescript --remove-name-section --remove-produce
   --out-dir pkg target/wasm32-unknown-unknown/wasm-release/frigo_site.wasm
 cargo run --release                    # http://localhost:3000 (PORT sinon)
 ```
+
+### L'app installable et le partage
+
+Le site est une **PWA** : un manifeste (`/manifest.webmanifest`) avec ses propres icônes
+(`public/assets/icon-*.png`, dont une « maskable » pour Android et `apple-touch-icon.png`
+pour iPhone) et un service worker (`/sw.js`) qui garde la page, le bundle et les icônes pour
+l'ouvrir sans réseau. Le bouton **Installer l'app** apparaît quand le navigateur propose
+l'installation ; sur iPhone, une astuce rappelle « Partager → Sur l'écran d'accueil ».
+
+La section **Partager** (`#partager`) montre une carte à scanner (un QR code dessiné en SVG
+par le serveur), le partage natif du téléphone, la copie du lien et des liens directs
+(WhatsApp, Telegram, X, Facebook, LinkedIn, e-mail, SMS), sans script tiers ni traceur.
+Les aperçus sur les réseaux utilisent `public/assets/og.png` (1200 × 630).
+
+L'adresse partagée est `SITE_URL` si elle est définie, sinon celle demandée par le
+visiteur (`Host`, `X-Forwarded-Proto` derrière Heroku). Les images PNG se régénèrent depuis
+leurs SVG avec `node tools/images.mjs` (Playwright).
 
 ### Sur GitHub Pages
 

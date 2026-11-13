@@ -47,3 +47,51 @@ async fn unknown_pages_are_404() {
     assert_eq!(res.status(), 404);
     assert!(res.text().contains("Ce placard est vide"));
 }
+
+#[tokio::test]
+async fn the_app_is_installable_with_its_own_icons() {
+    let client = frigo_site::server::app().test().await;
+    let manifest = client.get("/manifest.webmanifest").await.text();
+    for icon in [
+        "/assets/icon-192.png",
+        "/assets/icon-512.png",
+        "/assets/icon-maskable-512.png",
+    ] {
+        assert!(manifest.contains(icon), "{icon} dans le manifeste");
+        assert_eq!(client.get(icon).await.status(), 200, "{icon}");
+    }
+    assert!(manifest.contains(r#""purpose":"maskable""#));
+    assert!(manifest.contains(r#""display":"standalone""#));
+    let worker = client.get("/sw.js").await.text();
+    assert!(
+        worker.contains("/assets/icon-512.png"),
+        "les icônes sont gardées hors ligne"
+    );
+    let html = client.get("/").await.text();
+    assert!(html.contains(r#"<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"/>"#));
+    assert!(html.contains("data-install"), "le bouton d'installation");
+}
+
+#[tokio::test]
+async fn the_share_card_points_to_the_public_url() {
+    let client = frigo_site::server::app().test().await;
+    let html = client
+        .get("/")
+        .header("host", "frigo.example.com")
+        .header("x-forwarded-proto", "https")
+        .await
+        .text();
+    assert!(html.contains("id=\"partager\""));
+    assert!(html.contains("<svg class=\"qr\""), "le QR code");
+    assert!(html.contains("frigo.example.com"));
+    assert!(html.contains("https://wa.me/?text="));
+    assert!(html.contains("https%3A%2F%2Ffrigo.example.com%2F"));
+    assert!(
+        html.contains(
+            r#"<meta property="og:image" content="https://frigo.example.com/assets/og.png"/>"#
+        ),
+        "l'aperçu des réseaux est une image PNG à une adresse absolue"
+    );
+    assert!(html.contains("footer__bottom"), "le pied de page");
+    assert!(html.contains("Signaler un problème"));
+}
