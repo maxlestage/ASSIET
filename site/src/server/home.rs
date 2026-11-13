@@ -53,8 +53,8 @@ fn layout(site: &Site, title: &str, content: Element) -> Page {
                 .og_type("website")
                 .locale("fr_FR")
                 .image(format!("{}assets/og.png", site.url))
-                .meta_property("og:image:width", "1200")
-                .meta_property("og:image:height", "630")
+                .meta_property("og:image:width", "2400")
+                .meta_property("og:image:height", "1260")
                 .meta_property(
                     "og:image:alt",
                     "Frigo vide : le frigo est vide ? Pas l'assiette.",
