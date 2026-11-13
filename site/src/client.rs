@@ -1,8 +1,9 @@
 //! Le bundle du navigateur : rend les îlots interactifs et anime la page (apparitions au
-//! défilement, barre de progression, barre de navigation). Sans lui, la page reste
-//! lisible et complète.
+//! défilement, barre de progression, barre de navigation), et fait marcher le partage
+//! (partage du téléphone, copie du lien) et l'installation de l'app. Sans lui, la page
+//! reste lisible et complète, et les liens de partage marchent.
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use wasm_bindgen::JsCast;
@@ -22,6 +23,8 @@ pub fn start() {
     // Seulement maintenant, le CSS peut cacher ce qui n'est pas encore apparu.
     let _ = root.class_list().add_1("hydrated");
     scroll_state(&root);
+    sharing();
+    installing(&root);
 }
 
 fn window() -> web_sys::Window {
@@ -134,6 +137,164 @@ fn scroll_state(root: &HtmlElement) {
     let s = schedule.clone();
     on_passive::<web_sys::Event>(&window(), "scroll", move |e| s(e));
     on_passive::<web_sys::Event>(&window(), "resize", move |e| schedule(e));
+}
+
+/// Lit `obj[key]`.
+fn get(obj: &JsValue, key: &str) -> JsValue {
+    js_sys::Reflect::get(obj, &JsValue::from_str(key)).unwrap_or(JsValue::UNDEFINED)
+}
+
+/// Appelle la méthode `key` de `obj` avec `args`.
+fn call(obj: &JsValue, key: &str, args: &[JsValue]) -> Option<JsValue> {
+    let f: js_sys::Function = get(obj, key).dyn_into().ok()?;
+    let args: js_sys::Array = args.iter().collect();
+    f.apply(obj, &args).ok()
+}
+
+/// Attend une promesse, puis `then(réussie)` (un partage annulé n'est pas une erreur).
+fn settle(promise: Option<JsValue>, then: impl FnOnce(bool) + 'static) {
+    let Some(promise) = promise.and_then(|p| p.dyn_into::<js_sys::Promise>().ok()) else {
+        then(false);
+        return;
+    };
+    wasm_bindgen_futures::spawn_local(async move {
+        then(JsFuture::from(promise).await.is_ok());
+    });
+}
+
+fn on_click(el: &HtmlElement, f: impl Fn() + 'static) {
+    let closure = Closure::<dyn Fn()>::new(f);
+    let _ = el.add_event_listener_with_callback("click", closure.as_ref().unchecked_ref());
+    closure.forget();
+}
+
+/// Le bouton « Partager… » (le partage du téléphone, s'il existe) et « Copier le lien ».
+fn sharing() {
+    let navigator: JsValue = window().navigator().into();
+    if get(&navigator, "share").is_function() {
+        for button in all("[data-share]") {
+            button.set_hidden(false);
+            let data = js_sys::Object::new();
+            for key in ["url", "title", "text"] {
+                if let Some(value) = button.get_attribute(&format!("data-{key}")) {
+                    let _ = js_sys::Reflect::set(&data, &key.into(), &value.into());
+                }
+            }
+            let navigator = navigator.clone();
+            on_click(&button, move || {
+                settle(call(&navigator, "share", &[data.clone().into()]), |_| {});
+            });
+        }
+    }
+    for button in all("[data-copy]") {
+        button.set_hidden(false);
+        let url = button.get_attribute("data-copy").unwrap_or_default();
+        let target = button.clone();
+        let navigator = navigator.clone();
+        on_click(&button, move || {
+            let clipboard = get(&navigator, "clipboard");
+            let target = target.clone();
+            let url = url.clone();
+            let copy = if clipboard.is_object() {
+                call(&clipboard, "writeText", &[url.clone().into()])
+            } else {
+                None
+            };
+            settle(copy, move |copied| {
+                if copied {
+                    copied_feedback(&target);
+                } else {
+                    // Pas de presse-papiers (page non sécurisée, vieux navigateur).
+                    let _ = window().prompt_with_message_and_default("Copiez ce lien\u{a0}:", &url);
+                }
+            });
+        });
+    }
+}
+
+/// « Lien copié ✓ » pendant deux secondes.
+fn copied_feedback(button: &HtmlElement) {
+    let Ok(Some(label)) = button.query_selector("[data-copy-label]") else {
+        return;
+    };
+    label.set_text_content(Some("Lien copié ✓"));
+    let _ = button.class_list().add_1("is-done");
+    let button = button.clone();
+    let reset = Closure::once_into_js(move || {
+        label.set_text_content(Some("Copier le lien"));
+        let _ = button.class_list().remove_1("is-done");
+    });
+    let _ =
+        window().set_timeout_with_callback_and_timeout_and_arguments_0(reset.unchecked_ref(), 2000);
+}
+
+/// Montre ou cache les boutons « Installer l'app ».
+fn show_install(visible: bool) {
+    for button in all("[data-install]") {
+        button.set_hidden(!visible);
+    }
+}
+
+/// L'installation de l'app : le bouton « Installer l'app » apparaît quand le navigateur
+/// la propose (`beforeinstallprompt`), l'astuce pour Safari sur iPhone et iPad, et rien
+/// quand l'app est déjà installée (ouverte en plein écran).
+fn installing(root: &HtmlElement) {
+    let win = window();
+    let nav = win.navigator();
+    let navigator: JsValue = nav.clone().into();
+    let standalone = win
+        .match_media("(display-mode: standalone)")
+        .ok()
+        .flatten()
+        .is_some_and(|m| m.matches())
+        || get(&navigator, "standalone").as_bool() == Some(true);
+    if standalone {
+        let _ = root.class_list().add_1("standalone");
+        return;
+    }
+    let agent = nav.user_agent().unwrap_or_default();
+    let touch_mac = agent.contains("Macintosh") && nav.max_touch_points() > 1;
+    let ios = ["iPhone", "iPad", "iPod"].iter().any(|d| agent.contains(d)) || touch_mac;
+    if ios {
+        for hint in all("[data-install-ios]") {
+            hint.set_hidden(false);
+        }
+    }
+
+    let deferred: Rc<RefCell<Option<JsValue>>> = Rc::new(RefCell::new(None));
+    let offered = {
+        let deferred = deferred.clone();
+        Closure::<dyn Fn(web_sys::Event)>::new(move |event: web_sys::Event| {
+            // Le navigateur garde sa proposition : c'est notre bouton qui la montrera.
+            event.prevent_default();
+            deferred.replace(Some(event.into()));
+            show_install(true);
+        })
+    };
+    let _ = win
+        .add_event_listener_with_callback("beforeinstallprompt", offered.as_ref().unchecked_ref());
+    offered.forget();
+    let installed = Closure::<dyn Fn()>::new(|| {
+        show_install(false);
+        for hint in all("[data-install-ios]") {
+            hint.set_hidden(true);
+        }
+    });
+    let _ =
+        win.add_event_listener_with_callback("appinstalled", installed.as_ref().unchecked_ref());
+    installed.forget();
+
+    for button in all("[data-install]") {
+        let deferred = deferred.clone();
+        on_click(&button, move || {
+            let Some(event) = deferred.borrow_mut().take() else {
+                return;
+            };
+            let _ = call(&event, "prompt", &[]);
+            // La proposition ne sert qu'une fois, acceptée ou non.
+            settle(Some(get(&event, "userChoice")), |_| show_install(false));
+        });
+    }
 }
 
 /// `GET /api/recettes?i=…&strict=…`, puis `done(réponse)`.
